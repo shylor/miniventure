@@ -29,8 +29,11 @@ import com.mojang.ld22.screen.WonMenu;
 public class Game extends Canvas implements Runnable {
 	private static final long serialVersionUID = 1L;
 	private Random random = new Random();
+	// This is the name on the application window
 	public static final String NAME = "Miniventure";
+	// This is the hight of the game * scale
 	public static final int HEIGHT = 200;
+	// This is the width of the game * scale
 	public static final int WIDTH = 267;
 	private static final int SCALE = 3;
 
@@ -46,7 +49,11 @@ public class Game extends Canvas implements Runnable {
 	public int gameTime = 0;
 
 	private Level level;
+	// This array is about the different levels.
+	// Remember that arrays start at 0 so you have 0,1,2,3,4
 	private Level[] levels = new Level[5];
+	// This is the level the player is on.
+	// This is set to 3 which is the surface.
 	private int currentLevel = 3;
 	public Player player;
 
@@ -54,6 +61,7 @@ public class Game extends Canvas implements Runnable {
 	private int playerDeadTime;
 	private int pendingLevelChange;
 	private int wonTimer = 0;
+	// If the player wins this is set to true
 	public boolean hasWon = false;
 
 	public void setMenu(Menu menu) {

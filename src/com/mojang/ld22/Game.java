@@ -39,6 +39,7 @@ public class Game extends Canvas implements Runnable {
 
 	private BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
 	private int[] pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
+	// This stores if the game is running or paused
 	private boolean running = false;
 	private Screen screen;
 	private Screen lightScreen;
@@ -68,17 +69,21 @@ public class Game extends Canvas implements Runnable {
 		this.menu = menu;
 		if (menu != null) menu.init(this, input);
 	}
-
+	
+	// This starts the game logic after a pause
 	public void start() {
 		running = true;
 		new Thread(this).start();
 	}
 
+	// This pauses the game
 	public void stop() {
 		running = false;
 	}
 
+	// This just resets the game
 	public void resetGame() {
+		// Resets all values
 		playerDeadTime = 0;
 		wonTimer = 0;
 		gameTime = 0;
@@ -87,12 +92,14 @@ public class Game extends Canvas implements Runnable {
 		levels = new Level[5];
 		currentLevel = 3;
 
+		// generates new maps
 		levels[4] = new Level(128, 128, 1, null);
 		levels[3] = new Level(128, 128, 0, levels[4]);
 		levels[2] = new Level(128, 128, -1, levels[3]);
 		levels[1] = new Level(128, 128, -2, levels[2]);
 		levels[0] = new Level(128, 128, -3, levels[1]);
 
+		// adds the player to the surface map
 		level = levels[currentLevel];
 		player = new Player(this, input);
 		player.findStartPos(level);

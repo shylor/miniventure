@@ -29,7 +29,7 @@ import com.mojang.ld22.screen.WonMenu;
 public class Game extends Canvas implements Runnable {
 	private static final long serialVersionUID = 1L;
 	private Random random = new Random();
-	public static final String NAME = "Minicraft";
+	public static final String NAME = "Miniventure";
 	public static final int HEIGHT = 200;
 	public static final int WIDTH = 267;
 	private static final int SCALE = 3;

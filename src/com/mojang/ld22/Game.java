@@ -140,9 +140,11 @@ public class Game extends Canvas implements Runnable {
 		setMenu(new TitleMenu());
 	}
 
+	// Start up the code from where it was paused
 	public void run() {
 		long lastTime = System.nanoTime();
 		double unprocessed = 0;
+		// Nanoseconds per Tick
 		double nsPerTick = 1000000000.0 / 60;
 		int frames = 0;
 		int ticks = 0;

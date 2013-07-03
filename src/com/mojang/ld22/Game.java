@@ -140,7 +140,10 @@ public class Game extends Canvas implements Runnable {
 		setMenu(new TitleMenu());
 	}
 
-	// Start up the code from where it was paused
+	// This is the main loop that runs the game
+	// It keeps track of the amount of time that. It keeps track of the amount
+	// of time that has passed and fires the ticks needed to run the game. It
+	// also fires the command to render out the screen.
 	public void run() {
 		long lastTime = System.nanoTime();
 		double unprocessed = 0;

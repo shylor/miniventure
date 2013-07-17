@@ -86,7 +86,7 @@ public class Game extends Canvas implements Runnable {
 		running = false;
 	}
 
-	/** This just resets the game*/
+	/** This resets the game*/
 	public void resetGame() {
 		// Resets all values
 		playerDeadTime = 0;
@@ -108,20 +108,21 @@ public class Game extends Canvas implements Runnable {
 		   I just got those names from the wiki where someone named them that. Those levels don't have any real names yet -David 
 		*/
 		
-		// adds the player to the surface map
-		level = levels[currentLevel];
-		player = new Player(this, input);
-		player.findStartPos(level);
+		level = levels[currentLevel]; // puts level to the current level (surface)
+		player = new Player(this, input); // creates a new player
+		player.findStartPos(level); // finds the start level for the player
 
-		level.add(player);
+		level.add(player); // adds the player to the current level
 
 		for (int i = 0; i < 5; i++) {
-			levels[i].trySpawn(5000);
+			levels[i].trySpawn(5000); // populates all 5 levels with mobs.
 		}
 	}
-
+	
+	/** Initialization step, this is called when the game first starts. Sets up the colors and the screens. */
 	private void init() {
 		int pp = 0;
+		/* This loop below creates the 216 colors in minicraft. */
 		for (int r = 0; r < 6; r++) {
 			for (int g = 0; g < 6; g++) {
 				for (int b = 0; b < 6; b++) {
@@ -138,6 +139,7 @@ public class Game extends Canvas implements Runnable {
 				}
 			}
 		}
+		/* This sets up the screens, loads the icons.png spritesheet. */
 		try {
 			screen = new Screen(WIDTH, HEIGHT, new SpriteSheet(ImageIO.read(Game.class.getResourceAsStream("/icons.png"))));
 			lightScreen = new Screen(WIDTH, HEIGHT, new SpriteSheet(ImageIO.read(Game.class.getResourceAsStream("/icons.png"))));
@@ -145,57 +147,57 @@ public class Game extends Canvas implements Runnable {
 			e.printStackTrace();
 		}
 
-		resetGame();
-		setMenu(new TitleMenu());
+		resetGame(); // starts a new game... for some reason?
+		setMenu(new TitleMenu());  // Sets the menu to the title menu.
 	}
 
-	// This is the main loop that runs the game
-	// It keeps track of the amount of time that. It keeps track of the amount
-	// of time that has passed and fires the ticks needed to run the game. It
-	// also fires the command to render out the screen.
+	/** This is the main loop that runs the game
+	 It keeps track of the amount of time that. It keeps track of the amount
+	 of time that has passed and fires the ticks needed to run the game. It
+	 also fires the command to render out the screen. */
 	public void run() {
 		long lastTime = System.nanoTime();
 		double unprocessed = 0;
 		// Nanoseconds per Tick
-		double nsPerTick = 1000000000.0 / 60;
+		double nsPerTick = 1000000000.0 / 60; // There are 60 ticks per second.
 		int frames = 0;
 		int ticks = 0;
-		long lastTimer1 = System.currentTimeMillis();
+		long lastTimer1 = System.currentTimeMillis(); // current time in milliseconds.
 
-		init();
+		init(); // preps the game by setting up the screens and colors.
 
 		while (running) {
 			long now = System.nanoTime();
-			unprocessed += (now - lastTime) / nsPerTick;
+			unprocessed += (now - lastTime) / nsPerTick; //figures out the processed time between now and last Time.
 			lastTime = now;
 			boolean shouldRender = true;
-			while (unprocessed >= 1) {
-				ticks++;
-				tick();
-				unprocessed -= 1;
-				shouldRender = true;
+			while (unprocessed >= 1) { // If there is unprocessed time, then tick.
+				ticks++; //increases amount of ticks.
+				tick(); // calls the tick method (in which it calls the other tick methods throughout the code.
+				unprocessed -= 1; //the method is now processed. so it minuses by 1.
+				shouldRender = true; // causes the should render to be true... why is this here since it was already true? whatever.
 			}
 
 			try {
-				Thread.sleep(2);
+				Thread.sleep(2);//makes a small pause for 2 milliseconds
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 
 			if (shouldRender) {
-				frames++;
-				render();
+				frames++; // increases the amount of frames
+				render(); // renders the screen
 			}
 
-			if (System.currentTimeMillis() - lastTimer1 > 1000) {
-				lastTimer1 += 1000;
-				System.out.println(ticks + " ticks, " + frames + " fps");
-				frames = 0;
-				ticks = 0;
+			if (System.currentTimeMillis() - lastTimer1 > 1000) { //updates every 1 second
+				lastTimer1 += 1000;//adds a second to the timer
+				System.out.println(ticks + " ticks, " + frames + " fps"); // prints out the number of ticks, and the amount of frames to the console.
+				frames = 0;// resets the frames value.
+				ticks = 0;// resets the ticks value.
 			}
 		}
 	}
-
+	
 	public void tick() {
 		tickCount++;
 		if (!hasFocus()) {

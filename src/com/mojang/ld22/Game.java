@@ -340,35 +340,37 @@ public class Game extends Canvas implements Runnable {
 		}
 	}
 
+	/** Renders the "Click to focus" box when you click off the screen. */
 	private void renderFocusNagger() {
-		String msg = "Click to focus!";
-		int xx = (WIDTH - msg.length() * 8) / 2;
-		int yy = (HEIGHT - 8) / 2;
-		int w = msg.length();
+		String msg = "Click to focus!"; // the message when you click off the screen.
+		int xx = (WIDTH - msg.length() * 8) / 2; // the width of the box
+		int yy = (HEIGHT - 8) / 2; // the height of the box
+		int w = msg.length(); // length of the message. (by characters)
 		int h = 1;
 
-		screen.render(xx - 8, yy - 8, 0 + 13 * 32, Color.get(-1, 1, 5, 445), 0);
-		screen.render(xx + w * 8, yy - 8, 0 + 13 * 32, Color.get(-1, 1, 5, 445), 1);
-		screen.render(xx - 8, yy + 8, 0 + 13 * 32, Color.get(-1, 1, 5, 445), 2);
-		screen.render(xx + w * 8, yy + 8, 0 + 13 * 32, Color.get(-1, 1, 5, 445), 3);
+		screen.render(xx - 8, yy - 8, 0 + 13 * 32, Color.get(-1, 1, 5, 445), 0); // renders a corner of the box
+		screen.render(xx + w * 8, yy - 8, 0 + 13 * 32, Color.get(-1, 1, 5, 445), 1); // renders a corner of the box
+		screen.render(xx - 8, yy + 8, 0 + 13 * 32, Color.get(-1, 1, 5, 445), 2); // renders a corner of the box
+		screen.render(xx + w * 8, yy + 8, 0 + 13 * 32, Color.get(-1, 1, 5, 445), 3); // renders a corner of the box
 		for (int x = 0; x < w; x++) {
-			screen.render(xx + x * 8, yy - 8, 1 + 13 * 32, Color.get(-1, 1, 5, 445), 0);
-			screen.render(xx + x * 8, yy + 8, 1 + 13 * 32, Color.get(-1, 1, 5, 445), 2);
+			screen.render(xx + x * 8, yy - 8, 1 + 13 * 32, Color.get(-1, 1, 5, 445), 0); // renders the top part of the box
+			screen.render(xx + x * 8, yy + 8, 1 + 13 * 32, Color.get(-1, 1, 5, 445), 2); // renders the bottom part of the box
 		}
 		for (int y = 0; y < h; y++) {
-			screen.render(xx - 8, yy + y * 8, 2 + 13 * 32, Color.get(-1, 1, 5, 445), 0);
-			screen.render(xx + w * 8, yy + y * 8, 2 + 13 * 32, Color.get(-1, 1, 5, 445), 1);
+			screen.render(xx - 8, yy + y * 8, 2 + 13 * 32, Color.get(-1, 1, 5, 445), 0); // renders the left part of the box
+			screen.render(xx + w * 8, yy + y * 8, 2 + 13 * 32, Color.get(-1, 1, 5, 445), 1); // renders the right part of the box
 		}
 
-		if ((tickCount / 20) % 2 == 0) {
-			Font.draw(msg, screen, xx, yy, Color.get(5, 333, 333, 333));
+		if ((tickCount / 20) % 2 == 0) { 
+			Font.draw(msg, screen, xx, yy, Color.get(5, 333, 333, 333)); //renders the text with a flash effect. (medium yellow color)
 		} else {
-			Font.draw(msg, screen, xx, yy, Color.get(5, 555, 555, 555));
+			Font.draw(msg, screen, xx, yy, Color.get(5, 555, 555, 555)); //renders the text with a flash effect. (bright yellow color)
 		}
 	}
 
+	/** This method is called when you interact with stairs, this will give you the transition effect. While changeLevel(int) just changes the level. */
 	public void scheduleLevelChange(int dir) {
-		pendingLevelChange = dir;
+		pendingLevelChange = dir; // same as changeLevel(). Call scheduleLevelChange(1) if you want to go up 1 level, or call -1 to go down by 1.
 	}
 
 	public static void main(String[] args) {

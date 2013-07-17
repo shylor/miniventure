@@ -198,47 +198,51 @@ public class Game extends Canvas implements Runnable {
 		}
 	}
 	
+	/** The tick method is the updates that happen in the game, there are 60 ticks that happen per second. */
 	public void tick() {
-		tickCount++;
+		tickCount++; //increases tickCount by 1, not really used for anything.
 		if (!hasFocus()) {
-			input.releaseAll();
+			input.releaseAll(); // If the player is not focused on the screen, then all the current inputs will be set to off (well up).
 		} else {
-			if (!player.removed && !hasWon) gameTime++;
+			if (!player.removed && !hasWon) gameTime++; //increases tickCount by 1, this is used for the timer on the death screen.
 
-			input.tick();
-			if (menu != null) {
-				menu.tick();
+			input.tick(); // calls the tick() method in InputHandler.java
+			if (menu != null) { 
+				menu.tick(); // If there is a menu active, it will call the tick method of that menu.
 			} else {
 				if (player.removed) {
 					playerDeadTime++;
 					if (playerDeadTime > 60) {
-						setMenu(new DeadMenu());
+						setMenu(new DeadMenu()); // If the player has been removed and a second has passed, then set the menu to the dead menu.
 					}
 				} else {
 					if (pendingLevelChange != 0) {
-						setMenu(new LevelTransitionMenu(pendingLevelChange));
+						setMenu(new LevelTransitionMenu(pendingLevelChange)); //if the player hits a stairs, then a screen transition menu will appear.
 						pendingLevelChange = 0;
 					}
 				}
 				if (wonTimer > 0) {
 					if (--wonTimer == 0) {
-						setMenu(new WonMenu());
+						setMenu(new WonMenu()); // if the wonTimer is above 0, this will be called and if it hits 0 then it actives the win menu.
 					}
 				}
-				level.tick();
-				Tile.tickCount++;
+				level.tick(); // calls the tick() method in Level.java
+				Tile.tickCount++; // increases the tickCount in Tile.java. Used for Water.java and Lava.java.
 			}
 		}
 	}
 
+	/** This method changes the level that the player is currently on.
+	 * It takes 1 integer variable, which is used to tell the game which direction to go.
+	 * For example, 'changeLevel(1)' will make you go up a level, while 'changeLevel(-1)' will make you go down a level.
+	 */
 	public void changeLevel(int dir) {
-		level.remove(player);
-		currentLevel += dir;
-		level = levels[currentLevel];
-		player.x = (player.x >> 4) * 16 + 8;
-		player.y = (player.y >> 4) * 16 + 8;
-		level.add(player);
-
+		level.remove(player); // removes the player from the current level.
+		currentLevel += dir; // changes the current level by the amount
+		level = levels[currentLevel]; // sets the level to the current level
+		player.x = (player.x >> 4) * 16 + 8; //sets the player's x coord (to center yourself on the stairs)
+		player.y = (player.y >> 4) * 16 + 8; //sets the player's y coord (to center yourself on the stairs)
+		level.add(player); // adds the player to the level.
 	}
 
 	public void render() {

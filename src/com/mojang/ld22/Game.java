@@ -245,91 +245,98 @@ public class Game extends Canvas implements Runnable {
 		level.add(player); // adds the player to the level.
 	}
 
+	/** renders the current screen */
 	public void render() {
-		BufferStrategy bs = getBufferStrategy();
+		BufferStrategy bs = getBufferStrategy(); // creates a buffer strategy to determine how the graphics should be buffered.
 		if (bs == null) {
-			createBufferStrategy(3);
-			requestFocus();
+			createBufferStrategy(3); // if the buffer strategy is null, then make a new one!
+			requestFocus(); // requests the focus of the screen.
 			return;
 		}
 
-		int xScroll = player.x - screen.w / 2;
-		int yScroll = player.y - (screen.h - 8) / 2;
-		if (xScroll < 16) xScroll = 16;
-		if (yScroll < 16) yScroll = 16;
-		if (xScroll > level.w * 16 - screen.w - 16) xScroll = level.w * 16 - screen.w - 16;
-		if (yScroll > level.h * 16 - screen.h - 16) yScroll = level.h * 16 - screen.h - 16;
-		if (currentLevel > 3) {
-			int col = Color.get(20, 20, 121, 121);
+		int xScroll = player.x - screen.w / 2; // scrolls the screen in the x axis.
+		int yScroll = player.y - (screen.h - 8) / 2; //scrolls the screen in the y axis.
+		if (xScroll < 16) xScroll = 16; // if the screen is at the left border, then stop scrolling.
+		if (yScroll < 16) yScroll = 16; // if the screen is at the top border, then stop scrolling.
+		if (xScroll > level.w * 16 - screen.w - 16) xScroll = level.w * 16 - screen.w - 16; // if the screen is at the right border, then stop scrolling.
+		if (yScroll > level.h * 16 - screen.h - 16) yScroll = level.h * 16 - screen.h - 16; // if the screen is at the bottom border, then stop scrolling.
+		if (currentLevel > 3) { // if the current level is higher than 3 (which only the sky level is)
+			int col = Color.get(20, 20, 121, 121); // background color.
 			for (int y = 0; y < 14; y++)
 				for (int x = 0; x < 24; x++) {
-					screen.render(x * 8 - ((xScroll / 4) & 7), y * 8 - ((yScroll / 4) & 7), 0, col, 0);
+					screen.render(x * 8 - ((xScroll / 4) & 7), y * 8 - ((yScroll / 4) & 7), 0, col, 0); // creates the background for the sky level.
 				}
 		}
 
-		level.renderBackground(screen, xScroll, yScroll);
-		level.renderSprites(screen, xScroll, yScroll);
+		level.renderBackground(screen, xScroll, yScroll); // Calls the renderBackground() method in Level.java
+		level.renderSprites(screen, xScroll, yScroll); // Calls the renderSprites() method in Level.java
 
+		// this creates the fog-of-war (darkness) in the caves
 		if (currentLevel < 3) {
-			lightScreen.clear(0);
-			level.renderLight(lightScreen, xScroll, yScroll);
-			screen.overlay(lightScreen, xScroll, yScroll);
+			lightScreen.clear(0); //clears the light screen to a black color
+			level.renderLight(lightScreen, xScroll, yScroll); // finds all (and renders) the light from objects (like the player, lanterns, and lava).
+			screen.overlay(lightScreen, xScroll, yScroll); // overlays the light screen over the main screen.
 		}
 
-		renderGui();
+		renderGui(); // calls the renderGui() method.
 
-		if (!hasFocus()) renderFocusNagger();
+		if (!hasFocus()) renderFocusNagger(); // calls the renderFocusNagger() method, which creates the "Click to Focus" message.
 
+		
 		for (int y = 0; y < screen.h; y++) {
 			for (int x = 0; x < screen.w; x++) {
-				int cc = screen.pixels[x + y * screen.w];
-				if (cc < 255) pixels[x + y * WIDTH] = colors[cc];
+				//loops through all the pixels on the screen
+				int cc = screen.pixels[x + y * screen.w]; // finds a pixel on the screen.
+				if (cc < 255) pixels[x + y * WIDTH] = colors[cc]; // colors the pixel accordingly.
 			}
 		}
 
-		Graphics g = bs.getDrawGraphics();
-		g.fillRect(0, 0, getWidth(), getHeight());
+		Graphics g = bs.getDrawGraphics(); // gets the graphics in which java draws the picture
+		g.fillRect(0, 0, getWidth(), getHeight()); // fills the window with the graphics we draw in the window.
 
-		int ww = WIDTH * 3;
-		int hh = HEIGHT * 3;
-		int xo = (getWidth() - ww) / 2;
-		int yo = (getHeight() - hh) / 2;
-		g.drawImage(image, xo, yo, ww, hh, null);
-		g.dispose();
-		bs.show();
+		int ww = WIDTH * 3; //scales the pixels 3 times as large so we can see the screen good.
+		int hh = HEIGHT * 3; //scales the pixels 3 times as large so we can see the screen good.
+		int xo = (getWidth() - ww) / 2; //gets an offset for the image.
+		int yo = (getHeight() - hh) / 2; //gets an offset for the image.
+		g.drawImage(image, xo, yo, ww, hh, null); //draws the image on the window
+		g.dispose(); // releases any system resources that are using this method. (so we don't have crappy framerates)
+		bs.show(); // makes the picture visible. (I think)
 	}
 
+	/** Renders the GUI on the screen used in the main game (hearts, Stamina bolts, name of the current item, etc, etc) */
 	private void renderGui() {
+		
 		for (int y = 0; y < 2; y++) {
 			for (int x = 0; x < 20; x++) {
+				//renders a black box at the bottom of the screen.
 				screen.render(x * 8, screen.h - 16 + y * 8, 0 + 12 * 32, Color.get(000, 000, 000, 000), 0);
 			}
 		}
 
 		for (int i = 0; i < 10; i++) {
 			if (i < player.health)
-				screen.render(i * 8, screen.h - 16, 0 + 12 * 32, Color.get(000, 200, 500, 533), 0);
+				screen.render(i * 8, screen.h - 16, 0 + 12 * 32, Color.get(000, 200, 500, 533), 0);//renders your current red hearts.
 			else
-				screen.render(i * 8, screen.h - 16, 0 + 12 * 32, Color.get(000, 100, 000, 000), 0);
+				screen.render(i * 8, screen.h - 16, 0 + 12 * 32, Color.get(000, 100, 000, 000), 0);//renders black hearts for damaged health.
 
 			if (player.staminaRechargeDelay > 0) {
 				if (player.staminaRechargeDelay / 4 % 2 == 0)
-					screen.render(i * 8, screen.h - 8, 1 + 12 * 32, Color.get(000, 555, 000, 000), 0);
+					screen.render(i * 8, screen.h - 8, 1 + 12 * 32, Color.get(000, 555, 000, 000), 0);//creates the blinking effect when you run out of stamina. (white part)
 				else
-					screen.render(i * 8, screen.h - 8, 1 + 12 * 32, Color.get(000, 110, 000, 000), 0);
+					screen.render(i * 8, screen.h - 8, 1 + 12 * 32, Color.get(000, 110, 000, 000), 0);//creates the blinking effect when you run out of stamina. (gray part)
 			} else {
 				if (i < player.stamina)
-					screen.render(i * 8, screen.h - 8, 1 + 12 * 32, Color.get(000, 220, 550, 553), 0);
+					screen.render(i * 8, screen.h - 8, 1 + 12 * 32, Color.get(000, 220, 550, 553), 0);//renders your current stamina
 				else
-					screen.render(i * 8, screen.h - 8, 1 + 12 * 32, Color.get(000, 110, 000, 000), 0);
+					screen.render(i * 8, screen.h - 8, 1 + 12 * 32, Color.get(000, 110, 000, 000), 0);//renders your uncharged stamina (grayed)
 			}
 		}
 		if (player.activeItem != null) {
-			player.activeItem.renderInventory(screen, 10 * 8, screen.h - 16);
+			player.activeItem.renderInventory(screen, 10 * 8, screen.h - 16);//if you have an active item then it will render the item sprite and it's name.
 		}
 
 		if (menu != null) {
-			menu.render(screen);
+			menu.render(screen);//if there is an active menu, then it will render it.
 		}
 	}
 

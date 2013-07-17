@@ -37,8 +37,8 @@ public class Game extends Canvas implements Runnable {
 	public static final int WIDTH = 267;
 	private static final int SCALE = 3;
 
-	private BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
-	private int[] pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
+	private BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB); //creates an image to be displayed on the screen.
+	private int[] pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData(); // the array of pixels that will be displayed on the screen.
 	// This stores if the game is running or paused
 	private boolean running = false;
 	private Screen screen;

@@ -373,26 +373,28 @@ public class Game extends Canvas implements Runnable {
 		pendingLevelChange = dir; // same as changeLevel(). Call scheduleLevelChange(1) if you want to go up 1 level, or call -1 to go down by 1.
 	}
 
+	/** The first method that is called when the application starts. */
 	public static void main(String[] args) {
-		Game game = new Game();
-		game.setMinimumSize(new Dimension(WIDTH * SCALE, HEIGHT * SCALE));
-		game.setMaximumSize(new Dimension(WIDTH * SCALE, HEIGHT * SCALE));
-		game.setPreferredSize(new Dimension(WIDTH * SCALE, HEIGHT * SCALE));
+		Game game = new Game(); // creates a new game.
+		game.setMinimumSize(new Dimension(WIDTH * SCALE, HEIGHT * SCALE)); // sets the minimum size of the window
+		game.setMaximumSize(new Dimension(WIDTH * SCALE, HEIGHT * SCALE)); // sets the maximum size of the window
+		game.setPreferredSize(new Dimension(WIDTH * SCALE, HEIGHT * SCALE)); // sets the preferred size of the window
 
-		JFrame frame = new JFrame(Game.NAME);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setLayout(new BorderLayout());
-		frame.add(game, BorderLayout.CENTER);
-		frame.pack();
-		frame.setResizable(false);
-		frame.setLocationRelativeTo(null);
-		frame.setVisible(true);
+		JFrame frame = new JFrame(Game.NAME); //creates a new window
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); //Exits the game when you hit the red "X" on the top right of the window.
+		frame.setLayout(new BorderLayout()); //sets the layout of the window
+		frame.add(game, BorderLayout.CENTER);  //Adds the game (which is a canvas) to the center of the screen.
+		frame.pack(); //contains everything into the preferredSize
+		frame.setResizable(false); // A user cannot resize the window.
+		frame.setLocationRelativeTo(null); // the window will pop up in the middle of the screen when launched.
+		frame.setVisible(true); //the frame will be set to visible.
 
-		game.start();
+		game.start(); // starts the game
 	}
 
+	/** This is called when the player has won the game */
 	public void won() {
-		wonTimer = 60 * 3;
-		hasWon = true;
+		wonTimer = 60 * 3; // the pause time before the win menu shows up.
+		hasWon = true; //confirms that the player has indeed, won the game.
 	}
 }

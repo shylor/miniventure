@@ -28,6 +28,11 @@ import com.mojang.ld22.screen.WonMenu;
 
 public class Game extends Canvas implements Runnable {
 	private static final long serialVersionUID = 1L;
+	
+	/* random is a class that can create random numbers. 
+	 * Example: 'int r = random.randInt(20);'
+	 * r will be a number between (0 to 19) [0 counts as the first value)
+	 */
 	private Random random = new Random();
 	// This is the name on the application window
 	public static final String NAME = "Miniventure";
@@ -35,53 +40,53 @@ public class Game extends Canvas implements Runnable {
 	public static final int HEIGHT = 200;
 	// This is the width of the game * scale
 	public static final int WIDTH = 267;
-	private static final int SCALE = 3;
+	private static final int SCALE = 3; // scales the window
 
 	private BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB); //creates an image to be displayed on the screen.
 	private int[] pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData(); // the array of pixels that will be displayed on the screen.
-	// This stores if the game is running or paused
-	private boolean running = false;
-	private Screen screen;
-	private Screen lightScreen;
-	private InputHandler input = new InputHandler(this);
+	private boolean running = false; // This stores if the game is running or paused
+	private Screen screen; // Creates the main screen
+	private Screen lightScreen; // Creates a front screen to render the darkness in caves (Fog of war).
+	private InputHandler input = new InputHandler(this); // Creates the class (InputHandler.java) that will take in out inputs (aka: pressing the 'W' key).
 
-	private int[] colors = new int[256];
-	private int tickCount = 0;
-	public int gameTime = 0;
+	private int[] colors = new int[256]; // All of the colors put into an array
+	private int tickCount = 0; // Used in the ticking system
+	public int gameTime = 0; // Main value in the timer used on the dead screen.
 
-	private Level level;
+	private Level level; // This is the current level you are on.
 	// This array is about the different levels.
 	// Remember that arrays start at 0 so you have 0,1,2,3,4
 	private Level[] levels = new Level[5];
 	// This is the level the player is on.
 	// This is set to 3 which is the surface.
 	private int currentLevel = 3;
-	public Player player;
+	public Player player; // the player himself
 
-	public Menu menu;
-	private int playerDeadTime;
-	private int pendingLevelChange;
-	private int wonTimer = 0;
-	// If the player wins this is set to true
-	public boolean hasWon = false;
+	public Menu menu; // the current menu you are on.
+	private int playerDeadTime; // the paused time when you die before the dead menu shows up.
+	private int pendingLevelChange; // used to determined if the player should change levels or not.
+	private int wonTimer = 0; // the paused time when you win before the win menu shows up.
+	public boolean hasWon = false; 	// If the player wins this is set to true
 
+	//Blue text is used in eclipse to set the description of a method. Put your mouse over the "SetMenu(Menu menu)" method text to see it.
+	/** Use this method to switch to another menu. */
 	public void setMenu(Menu menu) {
 		this.menu = menu;
 		if (menu != null) menu.init(this, input);
 	}
 	
-	// This starts the game logic after a pause
+	/** This starts the game logic after a pause */
 	public void start() {
 		running = true;
 		new Thread(this).start();
 	}
 
-	// This pauses the game
+	/** This pauses the game */
 	public void stop() {
 		running = false;
 	}
 
-	// This just resets the game
+	/** This just resets the game*/
 	public void resetGame() {
 		// Resets all values
 		playerDeadTime = 0;
@@ -93,12 +98,16 @@ public class Game extends Canvas implements Runnable {
 		currentLevel = 3;
 
 		// generates new maps
-		levels[4] = new Level(128, 128, 1, null);
-		levels[3] = new Level(128, 128, 0, levels[4]);
-		levels[2] = new Level(128, 128, -1, levels[3]);
-		levels[1] = new Level(128, 128, -2, levels[2]);
-		levels[0] = new Level(128, 128, -3, levels[1]);
+		levels[4] = new Level(128, 128, 1, null); // creates the sky map
+		levels[3] = new Level(128, 128, 0, levels[4]); // creates the overworld
+		levels[2] = new Level(128, 128, -1, levels[3]); // creates the mines (iron level)
+		levels[1] = new Level(128, 128, -2, levels[2]); // creates the deep mines (water/gold level)
+		levels[0] = new Level(128, 128, -3, levels[1]); // creates the nether (lava/gem level)
 
+		/* Please note: the terms "Mines", "Deep Mines", and "Nether" are not the real names used in the code
+		   I just got those names from the wiki where someone named them that. Those levels don't have any real names yet -David 
+		*/
+		
 		// adds the player to the surface map
 		level = levels[currentLevel];
 		player = new Player(this, input);

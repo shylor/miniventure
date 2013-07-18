@@ -9,11 +9,11 @@ import com.mojang.ld22.gfx.Screen;
 
 public class PowerGloveItem extends Item {
 	public int getColor() {
-		return Color.get(-1, 100, 320, 430);
+		return Color.get(-1, 100, 320, 430); //sets the color of the powerglove
 	}
 
 	public int getSprite() {
-		return 7 + 4 * 32;
+		return 7 + 4 * 32; //returns the location of the sprite(image of the glove)
 	}
 
 	public void renderIcon(Screen screen, int x, int y) {
@@ -26,7 +26,7 @@ public class PowerGloveItem extends Item {
 	}
 
 	public String getName() {
-		return "Pow glove";
+		return "Pow glove"; //returns the name of the glove
 	}
 
 	public boolean interact(Player player, Entity entity, int attackDir) {

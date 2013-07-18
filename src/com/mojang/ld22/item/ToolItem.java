@@ -11,12 +11,12 @@ import com.mojang.ld22.gfx.Screen;
 public class ToolItem extends Item {
 	private Random random = new Random();
 
-	public static final int MAX_LEVEL = 5;
-	public static final String[] LEVEL_NAMES = { //
+	public static final int MAX_LEVEL = 5; // How many different levels of tools there are
+	public static final String[] LEVEL_NAMES = { // The names of the different levels. Later levels means stronger tool
 	"Wood", "Rock", "Iron", "Gold", "Gem"//
 	};
 
-	public static final int[] LEVEL_COLORS = {//
+	public static final int[] LEVEL_COLORS = {// Colors of the tools, same position as LEVEL_NAMES
 	Color.get(-1, 100, 321, 431),//
 			Color.get(-1, 100, 321, 111),//
 			Color.get(-1, 100, 321, 555),//
@@ -60,12 +60,12 @@ public class ToolItem extends Item {
 		return true;
 	}
 
-	public int getAttackDamageBonus(Entity e) {
+	public int getAttackDamageBonus(Entity e) { //calculates damage
 		if (type == ToolType.axe) {
-			return (level + 1) * 2 + random.nextInt(4);
+			return (level + 1) * 2 + random.nextInt(4); // axes: (level + 1) * 2 + random number beteween 0 and 3
 		}
 		if (type == ToolType.sword) {
-			return (level + 1) * 3 + random.nextInt(2 + level * level * 2);
+			return (level + 1) * 3 + random.nextInt(2 + level * level * 2); //swords: (level + 1) * 3 + random number between 0 and (2 + level * level * 2)
 		}
 		return 1;
 	}

@@ -12,8 +12,8 @@ public class Workbench extends Furniture {
 		super("Workbench"); // Name of the Workbench
 		col = Color.get(-1, 100, 321, 431); // Color of the workbench
 		sprite = 4; // Location of the sprite
-		xr = 3; // Width of the workbench (in-game, not sprite) 
-		yr = 2; // Width of the workbench (in-game, not sprite) 
+		xr = 3; // Width of the workbench
+		yr = 2; // Height of the workbench 
 	}
 
 	/** This is what occurs when the player uses the "Menu" command near this */

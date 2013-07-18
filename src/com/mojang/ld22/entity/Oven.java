@@ -12,8 +12,8 @@ public class Oven extends Furniture {
 		super("Oven"); // Name of the oven.
 		col = Color.get(-1, 000, 332, 442); // Color of the oven
 		sprite = 2; // Location of the sprite
-		xr = 3; // Width of the oven (in-game, not sprite) 
-		yr = 2; // Width of the oven (in-game, not sprite) 
+		xr = 3; // Width of the oven 
+		yr = 2; // Height of the oven 
 	}
 
 	/** This is what occurs when the player uses the "Menu" command near this */

@@ -10,63 +10,81 @@ import javax.swing.JOptionPane;
 import com.mojang.ld22.level.tile.Tile;
 
 public class LevelGen {
-	private static final Random random = new Random();
-	public double[] values;
-	private int w, h;
-
+	private static final Random random = new Random(); //Initializes the random class
+	public double[] values; //An array of doubles, used to help making noise for the map
+	private int w, h; // width and height of the map
+	
+	/** This creates noise to create random values for level generation */
 	public LevelGen(int w, int h, int featureSize) {
-		this.w = w;
-		this.h = h;
+		this.w = w; // assigns the width of the map
+		this.h = h; // assigns the height of the map
 
-		values = new double[w * h];
+		values = new double[w * h]; // creates the size of the value array (width * height)
 
-		for (int y = 0; y < w; y += featureSize) {
-			for (int x = 0; x < w; x += featureSize) {
-				setSample(x, y, random.nextFloat() * 2 - 1);
+		for (int y = 0; y < w; y += featureSize) { // Loops through the width of the map, going up by the featureSize value each time. 
+			for (int x = 0; x < w; x += featureSize) { // Loops through the width of the map a second time, going up by the featureSize value each time.
+				setSample(x, y, random.nextFloat() * 2 - 1); // sets a random value at a x and y point.
 			}
 		}
 
-		int stepSize = featureSize;
-		double scale = 1.0 / w;
-		double scaleMod = 1;
-		do {
-			int halfStep = stepSize / 2;
-			for (int y = 0; y < w; y += stepSize) {
-				for (int x = 0; x < w; x += stepSize) {
-					double a = sample(x, y);
-					double b = sample(x + stepSize, y);
-					double c = sample(x, y + stepSize);
-					double d = sample(x + stepSize, y + stepSize);
-
+		int stepSize = featureSize; // stepSize is the featureSize that is given when you call the method. 
+		double scale = 1.0 / w; // scale of the map
+		double scaleMod = 1; // scale modification
+		do { //do this...
+			int halfStep = stepSize / 2;  // Half of stepSize
+			for (int y = 0; y < w; y += stepSize) { // Loops through the width value of the map, going up by the stepSize value each time. 
+				for (int x = 0; x < w; x += stepSize) { // Loops through the width value of the map, going up by the stepSize value each time. 
+					double a = sample(x, y); // gets a sample value from the x and y value.
+					double b = sample(x + stepSize, y); // gets a sample value from the next value of x, and the current y value.
+					double c = sample(x, y + stepSize); // gets a sample value from the current x, and next value of y.
+					double d = sample(x + stepSize, y + stepSize); // gets a sample value from the next x value and next y value.
+					
+					/* Well doesn't this one look complicated? No worries, just look at it step by step. 
+					 *  The first thing it does is add up a+b+c+d as one variable. Then divides that number by 4 (making an average).
+					 *  Since java follows the pemdas rule, lets look at the right side next.
+					 *  "(random.nextFloat() * 2 - 1) * stepSize * scale"
+					 *   random.nextFloat() creates any random value between 0 to 1. For example: 0.39541882 is a value that can be, lets call it r.
+					 *   Now at the start it's simple numbers,  but as we go farther below in the code we see these values change in this loop.
+					 *   So the value of e can be simplified as: (Average of a,b,c,d) + ((value from 0 to 1) * 2 - 1) * (stepSize value) * (scale value).
+					 *   hope this helps a little bit, I'm not an algebra teacher lol. */
 					double e = (a + b + c + d) / 4.0 + (random.nextFloat() * 2 - 1) * stepSize * scale;
-					setSample(x + halfStep, y + halfStep, e);
+					
+					setSample(x + halfStep, y + halfStep, e); // sets the value e at the next x value and next y value. repeat these until loop is done.
 				}
 			}
-			for (int y = 0; y < w; y += stepSize) {
-				for (int x = 0; x < w; x += stepSize) {
-					double a = sample(x, y);
-					double b = sample(x + stepSize, y);
-					double c = sample(x, y + stepSize);
-					double d = sample(x + halfStep, y + halfStep);
-					double e = sample(x + halfStep, y - halfStep);
-					double f = sample(x - halfStep, y + halfStep);
+			for (int y = 0; y < w; y += stepSize) { // Loops through the width value of the map, going up by the stepSize value each time. 
+				for (int x = 0; x < w; x += stepSize) { // Loops through the width value of the map, going up by the stepSize value each time. 
+					double a = sample(x, y); // gets a sample value from the x and y value.
+					double b = sample(x + stepSize, y); // gets a sample value from the next value of x, and the current y value.
+					double c = sample(x, y + stepSize); // gets a sample value from the current x, and next value of y.
+					double d = sample(x + halfStep, y + halfStep); // gets a sample value from the next x value and next y value.
+					double e = sample(x + halfStep, y - halfStep); // gets a sample value from the next x value and the previous y value.
+					double f = sample(x - halfStep, y + halfStep); // gets a sample value from the previous x value and the next y value.
 
+					/* H & g are the same as e from the last paragraph. So see that for more info. */
+					
+					/* (Average of a,b,d,e) + ((value from 0 to 1) * 2 - 1) * (stepSize value) * (scale value) * 0.5 */
 					double H = (a + b + d + e) / 4.0 + (random.nextFloat() * 2 - 1) * stepSize * scale * 0.5;
+					
+					/* (Average of a,c,d,f) + ((value from 0 to 1) * 2 - 1) * (stepSize value) * (scale value) * 0.5 */
 					double g = (a + c + d + f) / 4.0 + (random.nextFloat() * 2 - 1) * stepSize * scale * 0.5;
-					setSample(x + halfStep, y, H);
-					setSample(x, y + halfStep, g);
+					
+					setSample(x + halfStep, y, H); // sets the H value at the half-way position of the next x value, and the current y value. 
+					setSample(x, y + halfStep, g); // sets the g value at the current x value, and half-way position of the next y value.
 				}
 			}
-			stepSize /= 2;
-			scale *= (scaleMod + 0.8);
-			scaleMod *= 0.3;
-		} while (stepSize > 1);
+			stepSize /= 2; // cuts the stepSize value in half.
+			scale *= (scaleMod + 0.8); // Multiplies the scale by (scaleMod value + 0.8)
+			scaleMod *= 0.3; // multiplies the scaleMod by 0.3
+		} while (stepSize > 1); // ...if stepSize is larger than 1.
 	}
 
+	/** Returns a value from the values array based on the X and Y coordinates */
 	private double sample(int x, int y) {
 		return values[(x & (w - 1)) + (y & (h - 1)) * w];
 	}
 
+	/** Sets a value in the values array based on the X and Y coordinates */
 	private void setSample(int x, int y, double value) {
 		values[(x & (w - 1)) + (y & (h - 1)) * w] = value;
 	}

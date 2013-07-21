@@ -468,37 +468,82 @@ public class LevelGen {
 		return new byte[][] { map, data }; // returns the map's tiles and data.
 	}
 
+	/** Yep, LevelGen has a main method. When you run this class it will show a generator. */
 	public static void main(String[] args) {
-		int d=0;
-		while (true) {
-			int w = 128;
-			int h = 128;
+		/* Note: I changed a bit of this method to make it a lot better. -David */
+		
+		int d=0; // Depth used when looking at the underground map
+		boolean hasquit = false; // Determines if the player has quit the program or not.
+		while (!hasquit) { //If the player has not quit the map
+			int w = 128; // width of the map
+			int h = 128; // height of the map
+			int m = 0; // map being looked at (0 = overworld, 1 = underground, 2 = sky)
+			byte[] map; // the map
+			
+			/* The switch statement is like a short if-else method.
+			  In this case we are switching the map variable based on what m is.
+			  If m = 1, then it will be case 1. Which is the underground
+			  if m = 2, then it will be case 2. Which is the sky
+			  If m is anything else, it will create the sky map. (that is what default stands for) */
+			switch(m){
+			default: 
+			map = LevelGen.createAndValidateTopMap(w, h)[0]; // Map will show the surface.
+			break; // breaks the switch so it won't go to case 1.
+			case 1:
+			map = LevelGen.createAndValidateUndergroundMap(w, h, (d++ % 3) + 1)[0];// Map will show the underground, switching depths each time.
+			break; // breaks the switch so it won't go to case 2.
+			case 2:
+			map = LevelGen.createAndValidateSkyMap(w, h)[0]; // Map will show the sky.
+			break; // breaks the switch.
+			}
 
-			byte[] map = LevelGen.createAndValidateTopMap(w, h)[0];
-			// byte[] map = LevelGen.createAndValidateUndergroundMap(w, h, (d++ % 3) + 1)[0];
-			// byte[] map = LevelGen.createAndValidateSkyMap(w, h)[0];
-
-			BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
-			int[] pixels = new int[w * h];
-			for (int y = 0; y < h; y++) {
-				for (int x = 0; x < w; x++) {
-					int i = x + y * w;
-
-					if (map[i] == Tile.water.id) pixels[i] = 0x000080;
-					if (map[i] == Tile.grass.id) pixels[i] = 0x208020;
-					if (map[i] == Tile.rock.id) pixels[i] = 0xa0a0a0;
-					if (map[i] == Tile.dirt.id) pixels[i] = 0x604040;
-					if (map[i] == Tile.sand.id) pixels[i] = 0xa0a040;
-					if (map[i] == Tile.tree.id) pixels[i] = 0x003000;
-					if (map[i] == Tile.lava.id) pixels[i] = 0xff2020;
-					if (map[i] == Tile.cloud.id) pixels[i] = 0xa0a0a0;
-					if (map[i] == Tile.stairsDown.id) pixels[i] = 0xffffff;
-					if (map[i] == Tile.stairsUp.id) pixels[i] = 0xffffff;
-					if (map[i] == Tile.cloudCactus.id) pixels[i] = 0xff00ff;
+			BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB); // creates an image
+			int[] pixels = new int[w * h]; // The pixels in the image. (an integer array, the size is Width * height)
+			for (int y = 0; y < h; y++) { // Loops through the height of the map
+				for (int x = 0; x < w; x++) { // (inner-loop)Loops through the entire width of the map
+					int i = x + y * w; // current tile of the map.
+					
+					/*The colors used in the pixels are hexadecimal (0xRRGGBB). 
+				     0xff0000 would be fully red
+					 0x00ff00 would be fully blue
+					 0x0000ff would be fully green
+					 0x000000 would be black
+					 and 0xffffff would be white
+					 etc. */
+					if (map[i] == Tile.water.id) pixels[i] = 0x000080; // If the tile is water, then the pixel will be blue
+					if (map[i] == Tile.grass.id) pixels[i] = 0x208020; // If the tile is grass, then the pixel will be green
+					if (map[i] == Tile.rock.id) pixels[i] = 0xa0a0a0; // if the tile is rock, then the pixel will be gray
+					if (map[i] == Tile.dirt.id) pixels[i] = 0x604040; // if the tile is dirt, then the pixel will be brown
+					if (map[i] == Tile.sand.id) pixels[i] = 0xa0a040;  // if the tile is sand, then the pixel will be yellow
+					if (map[i] == Tile.tree.id) pixels[i] = 0x003000; // if the tile is tree, then the pixel will be a darker green
+					if (map[i] == Tile.lava.id) pixels[i] = 0xff2020; // if the tile is lava, then it will be red
+					if (map[i] == Tile.cloud.id) pixels[i] = 0xeeeeee; // if the tile is a cloud, then it will be light gray
+					if (map[i] == Tile.stairsDown.id) pixels[i] = 0xffffff; // if the tile is a stairs down, then it will be white.
+					if (map[i] == Tile.stairsUp.id) pixels[i] = 0xffffff; // if the tile is a stairs up, then it will be white.
+					if (map[i] == Tile.cloudCactus.id) pixels[i] = 0xdd55dd; // if the tile is a cloud cactus, then it will be pink
+					if (map[i] == Tile.infiniteFall.id) pixels[i] = 0xcccccc; // if the tile is a cloud cactus, then it will be darker gray
 				}
 			}
-			img.setRGB(0, 0, w, h, pixels, 0, w);
-			JOptionPane.showMessageDialog(null, null, "Another", JOptionPane.YES_NO_OPTION, new ImageIcon(img.getScaledInstance(w * 4, h * 4, Image.SCALE_AREA_AVERAGING)));
+			img.setRGB(0, 0, w, h, pixels, 0, w); // sets the pixels into the image
+			
+			String[] options = {"Another", "Quit"}; //Name of the buttons used for the window.
+			
+			int o = JOptionPane.showOptionDialog( // creates a new window dialog (It's an integer because it returns a number)
+			null, // this would normally be used for a parent component (parent window), but we don't have one so it's null.
+			null, // this would normally be used for a message, but since we use a image so it's null.
+			"Map Generator", // Title of the window
+			JOptionPane.YES_NO_OPTION, // Option type
+			JOptionPane.QUESTION_MESSAGE, // message type (not important)
+			new ImageIcon(img.getScaledInstance(w * 4, h * 4, Image.SCALE_AREA_AVERAGING)), // creates the image, and scales it up 4 times as big
+			options, // lists the buttons below the image
+			null // start value (not important)
+			);
+			/* Now you noticed that we made the dialog an integer. This is because when you click a button it will return a number.
+		       Since we passed in 'options', the window will return 0 if you press "Another" and it will return 1 when you press "Quit".
+			   If you press the red "x" close mark, the window will return -1 */
+			
+			// If the dialog returns -1 (red "x" button) or 1 ("Quit" button) then...
+			if(o == -1 || o == 1) hasquit = true; // stop the loop and close the program.
 		}
 	}
 }

@@ -135,21 +135,23 @@ public class LevelGen {
 		} while (true); // While there is no returned result, keep looping.
 	}
 
+	/** Creates and determines if the sky map is ready to be played. */
 	public static byte[][] createAndValidateSkyMap(int w, int h) {
-		do {
-			byte[][] result = createSkyMap(w, h);
+		do { // Keep repeating this loop until it's done...
+			byte[][] result = createSkyMap(w, h); // creates the terrain.
 
-			int[] count = new int[256];
+			int[] count = new int[256]; // creates a new integer array
 
-			for (int i = 0; i < w * h; i++) {
-				count[result[0][i] & 0xff]++;
+			/* The '& 0xff' part gets the last 8 bits of the 32-bit integer. */
+			for (int i = 0; i < w * h; i++) { // Loops though the Width * Height of the map
+				count[result[0][i] & 0xff]++; // Increases the data value by 1, trust me it's important.
 			}
-			if (count[Tile.cloud.id & 0xff] < 2000) continue;
-			if (count[Tile.stairsDown.id & 0xff] < 2) continue;
+			if (count[Tile.cloud.id & 0xff] < 2000) continue; //If there are less than 2000 clouds on the map, then restart the loop
+			if (count[Tile.stairsDown.id & 0xff] < 2) continue; //If there are less than 2 stairs down on the map, then restart the loop
 
-			return result;
+			return result; // return the resulting map, and use it for the game
 
-		} while (true);
+		} while (true); // While there is no returned result, keep looking.
 	}
 
 	/** Creates the surface map */
@@ -397,63 +399,73 @@ public class LevelGen {
 	}
 
 	private static byte[][] createSkyMap(int w, int h) {
-		LevelGen noise1 = new LevelGen(w, h, 8);
-		LevelGen noise2 = new LevelGen(w, h, 8);
+		LevelGen noise1 = new LevelGen(w, h, 8);  // creates noise used for map generation, see the top of this class for more info.
+		LevelGen noise2 = new LevelGen(w, h, 8);  // creates noise used for map generation, see the top of this class for more info.
+ 
+		byte[] map = new byte[w * h]; // The tiles of the map
+		byte[] data = new byte[w * h]; // The data of the tiles
+		for (int y = 0; y < h; y++) { // loops through the height of the map
+			for (int x = 0; x < w; x++) { // loops though the width of the map
+				int i = x + y * w; // current tile being used in the loop
 
-		byte[] map = new byte[w * h];
-		byte[] data = new byte[w * h];
-		for (int y = 0; y < h; y++) {
-			for (int x = 0; x < w; x++) {
-				int i = x + y * w;
-
+				/* Math.abs() gets the absolute value of a number, which means it gets the number distance away from 0.
+				 *  Examples:
+				 *  Math.abs(4) = 4
+				 *  Math.abs(-4) = 4
+				 *  Math.abs(.12) = 0.12
+				 *  Math.abs(-845.15) = 845.15
+				 *  etc, etc */
+				
+				/* Gets a absolute value from the values from both noise objects, times it by 3 and subtracts by 2.*/
 				double val = Math.abs(noise1.values[i] - noise2.values[i]) * 3 - 2;
 
-				double xd = x / (w - 1.0) * 2 - 1;
-				double yd = y / (h - 1.0) * 2 - 1;
-				if (xd < 0) xd = -xd;
-				if (yd < 0) yd = -yd;
-				double dist = xd >= yd ? xd : yd;
-				dist = dist * dist * dist * dist;
-				dist = dist * dist * dist * dist;
-				val = -val * 1 - 2.2;
-				val = val + 1 - dist * 20;
+				double xd = x / (w - 1.0) * 2 - 1; // The x distance: (x value) / ((width value) - 1) * 2 - 1
+				double yd = y / (h - 1.0) * 2 - 1; // The y distance: (y value) / ((height value) - 1) * 2 - 1
+				if (xd < 0) xd = -xd; // If the x distance is smaller than 0, it reverses the value (turning it from negative to positive).
+				if (yd < 0) yd = -yd; // If the y distance is smaller than 0, it reverses the value (turning it from negative to positive).
+				double dist = xd >= yd ? xd : yd; // distance of clouds in the sky. Chooses either xd or yd depending on which is bigger
+				dist = dist * dist * dist * dist; // Multiplies itself 4 times.
+				dist = dist * dist * dist * dist; // Multiplies itself 4 times. (again)
+				val = -val * 1 - 2.2; // Reverses itself, then minuses by 2.2
+				val = val + 1 - dist * 20; // new value of val, takes distance into account. 
 
-				if (val < -0.25) {
-					map[i] = Tile.infiniteFall.id;
+				if (val < -0.25) { // If val is smaller than -0.25 then...
+					map[i] = Tile.infiniteFall.id; // the tile is a infiniteFall tile
 				} else {
-					map[i] = Tile.cloud.id;
+					map[i] = Tile.cloud.id; // else it will be a cloud tile
 				}
 			}
 		}
 
-		stairsLoop: for (int i = 0; i < w * h / 50; i++) {
-			int x = random.nextInt(w - 2) + 1;
-			int y = random.nextInt(h - 2) + 1;
+		
+		cactusLoop: for (int i = 0; i < w * h / 50; i++) { //loops through all the numbers that are less than (width * height / 50)
+			int x = random.nextInt(w - 2) + 1; // A random number between 0 to the map's width minus 2, plus one.
+			int y = random.nextInt(h - 2) + 1; // A random number between 0 to the map's width minus 2, plus one.
 
-			for (int yy = y - 1; yy <= y + 1; yy++)
-				for (int xx = x - 1; xx <= x + 1; xx++) {
-					if (map[xx + yy * w] != Tile.cloud.id) continue stairsLoop;
+			for (int yy = y - 1; yy <= y + 1; yy++) // Loops if yy is smaller or equal to y + 1
+				for (int xx = x - 1; xx <= x + 1; xx++) { // Loops if xx is smaller or equal to x + 1
+					if (map[xx + yy * w] != Tile.cloud.id) continue cactusLoop; // If the current tile is NOT a cloud tile, then it skips the loops back to the top.
 				}
 
-			map[x + y * w] = Tile.cloudCactus.id;
+			map[x + y * w] = Tile.cloudCactus.id; // replaces the cloud tile with a cloud cactus tile.
 		}
 
-		int count = 0;
-		stairsLoop: for (int i = 0; i < w * h; i++) {
-			int x = random.nextInt(w - 2) + 1;
-			int y = random.nextInt(h - 2) + 1;
+		int count = 0;// number of stairs in the map
+		stairsLoop: for (int i = 0; i < w * h; i++) { //loops through the entire map
+			int x = random.nextInt(w - 2) + 1; // A random number between 0 to the map's width minus 2, plus one.
+			int y = random.nextInt(h - 2) + 1; // A random number between 0 to the map's width minus 2, plus one.
 
-			for (int yy = y - 1; yy <= y + 1; yy++)
-				for (int xx = x - 1; xx <= x + 1; xx++) {
-					if (map[xx + yy * w] != Tile.cloud.id) continue stairsLoop;
+			for (int yy = y - 1; yy <= y + 1; yy++) // Loops if yy is smaller or equal to y + 1
+				for (int xx = x - 1; xx <= x + 1; xx++) { // Loops if xx is smaller or equal to x + 1
+					if (map[xx + yy * w] != Tile.cloud.id) continue stairsLoop; // If the current tile is NOT a cloud tile, then it skips the loops back to the top.
 				}
 
-			map[x + y * w] = Tile.stairsDown.id;
-			count++;
-			if (count == 2) break;
+			map[x + y * w] = Tile.stairsDown.id; // replaces the cloud tile with a stairs tile.
+			count++; // increases the count value by 1
+			if (count == 2) break; // If count is equal to 2, then break the main loop
 		}
 
-		return new byte[][] { map, data };
+		return new byte[][] { map, data }; // returns the map's tiles and data.
 	}
 
 	public static void main(String[] args) {
@@ -462,8 +474,8 @@ public class LevelGen {
 			int w = 128;
 			int h = 128;
 
-			//byte[] map = LevelGen.createAndValidateTopMap(w, h)[0];
-			 byte[] map = LevelGen.createAndValidateUndergroundMap(w, h, (d++ % 3) + 1)[0];
+			byte[] map = LevelGen.createAndValidateTopMap(w, h)[0];
+			// byte[] map = LevelGen.createAndValidateUndergroundMap(w, h, (d++ % 3) + 1)[0];
 			// byte[] map = LevelGen.createAndValidateSkyMap(w, h)[0];
 
 			BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);

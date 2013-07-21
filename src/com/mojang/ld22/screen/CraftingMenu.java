@@ -67,7 +67,7 @@ public class CraftingMenu extends Menu {
 		Font.renderFrame(screen, "Have", 12, 1, 19, 3); // renders the 'have' items window
 		Font.renderFrame(screen, "Cost", 12, 4, 19, 11); // renders the 'cost' items window
 		Font.renderFrame(screen, "Crafting", 0, 1, 11, 11); // renders the main crafting window
-		//renderItemList(screen, 0, 1, 11, 11, recipes, selected); // renders all the items in the recipe list
+		renderItemList(screen, 0, 1, 11, 11, recipes, selected); // renders all the items in the recipe list
 
 		if (recipes.size() > 0) { // If the size of the recipe list is above 0...
 			Recipe recipe = recipes.get(selected); // currently selected recipe

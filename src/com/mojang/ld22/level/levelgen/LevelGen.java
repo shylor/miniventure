@@ -89,7 +89,7 @@ public class LevelGen {
 		values[(x & (w - 1)) + (y & (h - 1)) * w] = value;
 	}
 
-	/** Creates and determines if the map is ready to be played. */
+	/** Creates and determines if the surface map is ready to be played. */
 	public static byte[][] createAndValidateTopMap(int w, int h) {
 		do { // Keep repeating this loop until it's done...
 			byte[][] result = createTopMap(w, h); // creates the terrain.
@@ -114,23 +114,25 @@ public class LevelGen {
 		} while (true); // While there is no returned result, keep looping.
 	}
 
+	/** Creates and determines if the underground map is ready to be played. */
 	public static byte[][] createAndValidateUndergroundMap(int w, int h, int depth) {
-		do {
-			byte[][] result = createUndergroundMap(w, h, depth);
+		do { // Keep repeating this loop until it's done...
+			byte[][] result = createUndergroundMap(w, h, depth); // creates the terrain.
 
-			int[] count = new int[256];
+			int[] count = new int[256]; // creates a new integer array
 
-			for (int i = 0; i < w * h; i++) {
-				count[result[0][i] & 0xff]++;
+			/* The '& 0xff' part gets the last 8 bits of the 32-bit integer. */
+			for (int i = 0; i < w * h; i++) { // Loops though the Width * Height of the map
+				count[result[0][i] & 0xff]++; // Increases the data value by 1, trust me it's important.
 			}
-			if (count[Tile.rock.id & 0xff] < 100) continue;
-			if (count[Tile.dirt.id & 0xff] < 100) continue;
-			if (count[(Tile.ironOre.id & 0xff) + depth - 1] < 20) continue;
-			if (depth < 3) if (count[Tile.stairsDown.id & 0xff] < 2) continue;
+			if (count[Tile.rock.id & 0xff] < 100) continue; // If there are less than 100 rock tiles on the map, then restart the loop
+			if (count[Tile.dirt.id & 0xff] < 100) continue; // If there are less than 100 dirt tiles on the map, then restart the loop
+			if (count[(Tile.ironOre.id & 0xff) + depth - 1] < 20) continue; // If there are less than 20 ore tiles on the map, then restart the loop
+			if (depth < 3) if (count[Tile.stairsDown.id & 0xff] < 2) continue; // if there is less than 2 stairs down on the map (besides lava level), then restart the loop.
 
-			return result;
+			return result; // return the resulting map, and use it for the game
 
-		} while (true);
+		} while (true); // While there is no returned result, keep looping.
 	}
 
 	public static byte[][] createAndValidateSkyMap(int w, int h) {
@@ -284,96 +286,114 @@ public class LevelGen {
 		return new byte[][] { map, data }; // returns the map's tiles and data.
 	}
 
+	/** Creates the underground maps (mines, water mines, lava mines) */
 	private static byte[][] createUndergroundMap(int w, int h, int depth) {
 		LevelGen mnoise1 = new LevelGen(w, h, 16);
-		LevelGen mnoise2 = new LevelGen(w, h, 16);
+		LevelGen mnoise2 = new LevelGen(w, h, 16);  /* creates noise used for map generation, see the top of this class for more info. */
 		LevelGen mnoise3 = new LevelGen(w, h, 16);
 
 		LevelGen nnoise1 = new LevelGen(w, h, 16);
-		LevelGen nnoise2 = new LevelGen(w, h, 16);
+		LevelGen nnoise2 = new LevelGen(w, h, 16);  /* creates noise used for map generation, see the top of this class for more info. */
 		LevelGen nnoise3 = new LevelGen(w, h, 16);
 
 		LevelGen wnoise1 = new LevelGen(w, h, 16);
-		LevelGen wnoise2 = new LevelGen(w, h, 16);
+		LevelGen wnoise2 = new LevelGen(w, h, 16);  /* creates noise used for map generation, see the top of this class for more info. */
 		LevelGen wnoise3 = new LevelGen(w, h, 16);
 
-		LevelGen noise1 = new LevelGen(w, h, 32);
+		LevelGen noise1 = new LevelGen(w, h, 32);  /* creates noise used for map generation, see the top of this class for more info. */
 		LevelGen noise2 = new LevelGen(w, h, 32);
 
-		byte[] map = new byte[w * h];
-		byte[] data = new byte[w * h];
-		for (int y = 0; y < h; y++) {
-			for (int x = 0; x < w; x++) {
-				int i = x + y * w;
+		byte[] map = new byte[w * h];  // The tiles of the map
+		byte[] data = new byte[w * h];  // The data of the tiles
+		for (int y = 0; y < h; y++) { // Loops through the height of the map
+			for (int x = 0; x < w; x++) { // Loops through the width of the map
+				int i = x + y * w; // current tile in the map
 
+				/* Math.abs() gets the absolute value of a number, which means it gets the number distance away from 0.
+				 *  Examples:
+				 *  Math.abs(4) = 4
+				 *  Math.abs(-4) = 4
+				 *  Math.abs(.12) = 0.12
+				 *  Math.abs(-845.15) = 845.15
+				 *  etc, etc */
+				
+				/* Gets a absolute value from the values from both noise objects, times it by 3 and subtracts by 2.*/
 				double val = Math.abs(noise1.values[i] - noise2.values[i]) * 3 - 2;
-
+				
+				/* Gets a absolute value from the values from 2 noise objects */
 				double mval = Math.abs(mnoise1.values[i] - mnoise2.values[i]);
+				/* Gets a absolute value from the values from the previous mval object and mnoise3, times it by 3 and subtracts by 2.*/
 				mval = Math.abs(mval - mnoise3.values[i]) * 3 - 2;
 
+				/* Gets a absolute value from the values from 2 noise objects */
 				double nval = Math.abs(nnoise1.values[i] - nnoise2.values[i]);
+				/* Gets a absolute value from the values from the previous nval object and mnoise3, times it by 3 and subtracts by 2.*/
 				nval = Math.abs(nval - nnoise3.values[i]) * 3 - 2;
 
+				/* Gets a absolute value from the values from 2 noise objects */
 				double wval = Math.abs(wnoise1.values[i] - wnoise2.values[i]);
+				/* Gets a absolute value from the values from the previous wval object and mnoise3, times it by 3 and subtracts by 2.*/
 				wval = Math.abs(nval - wnoise3.values[i]) * 3 - 2;
 
-				double xd = x / (w - 1.0) * 2 - 1;
-				double yd = y / (h - 1.0) * 2 - 1;
-				if (xd < 0) xd = -xd;
-				if (yd < 0) yd = -yd;
-				double dist = xd >= yd ? xd : yd;
-				dist = dist * dist * dist * dist;
-				dist = dist * dist * dist * dist;
-				val = val + 1 - dist * 20;
+				double xd = x / (w - 1.0) * 2 - 1; // The x distance: (x value) / ((width value) - 1) * 2 - 1
+				double yd = y / (h - 1.0) * 2 - 1; // The y distance: (y value) / ((height value) - 1) * 2 - 1
+				if (xd < 0) xd = -xd; // If the x distance is smaller than 0, it reverses the value (turning it from negative to positive).
+				if (yd < 0) yd = -yd; // If the y distance is smaller than 0, it reverses the value (turning it from negative to positive).
+				double dist = xd >= yd ? xd : yd; // distance of dirt in the cave. Chooses either xd or yd depending on which is bigger
+				dist = dist * dist * dist * dist; // dist multiplies itself by 4
+				dist = dist * dist * dist * dist; // multiplies itself by 4 (again)
+				val = val + 1 - dist * 20; // new value of val, takes distance into account.
 
-				if (val > -2 && wval < -2.0 + (depth) / 2 * 3) {
-					if (depth > 2)
-						map[i] = Tile.lava.id;
+				if (val > -2 && wval < -2.0 + (depth) / 2 * 3) {//if val is larger than -2, and wval is larger than -2 + (currentdepth / 2 * 3)
+					if (depth > 2) // if the depth is larger than 2...
+						map[i] = Tile.lava.id; // the tile will become lava
 					else
-						map[i] = Tile.water.id;
-				} else if (val > -2 && (mval < -1.7 || nval < -1.4)) {
-					map[i] = Tile.dirt.id;
+						map[i] = Tile.water.id; // else it will become water
+				} else if (val > -2 && (mval < -1.7 || nval < -1.4)) {//if val is larger than -2, and mval is smaller than -1.7 OR nval is smaller than -1.4 then...
+					map[i] = Tile.dirt.id; // the till will be dirt
 				} else {
-					map[i] = Tile.rock.id;
+					map[i] = Tile.rock.id; // else it will be rock
 				}
 			}
 		}
 
 		{
-			int r = 2;
+			int r = 2; // Radius? (assuming it is)
+			 /* A loop that will occur if a value "i" is smaller than the Width * Height / 400,  put in different number 
+			  instead of 400 to have different effects on the terrain. (Bigger number, more of that tile will spawn)*/
 			for (int i = 0; i < w * h / 400; i++) {
-				int x = random.nextInt(w);
-				int y = random.nextInt(h);
-				for (int j = 0; j < 30; j++) {
-					int xx = x + random.nextInt(5) - random.nextInt(5);
-					int yy = y + random.nextInt(5) - random.nextInt(5);
-					if (xx >= r && yy >= r && xx < w - r && yy < h - r) {
-						if (map[xx + yy * w] == Tile.rock.id) {
-							map[xx + yy * w] = (byte) ((Tile.ironOre.id & 0xff) + depth - 1);
+				int x = random.nextInt(w);  // A random number between 0 to the map's width (minus 1, because 0 is the first number)
+				int y = random.nextInt(h); // A random number between 0 to the map's height (minus 1, because 0 is the first number)
+				for (int j = 0; j < 30; j++) { // A loop that occurs 30 times
+					int xx = x + random.nextInt(5) - random.nextInt(5); // x + (random number between 0 to 4) - (random number between 0 to 4)
+					int yy = y + random.nextInt(5) - random.nextInt(5); // y + (random number between 0 to 4) - (random number between 0 to 4)
+					if (xx >= r && yy >= r && xx < w - r && yy < h - r) { // If xx & yy are equal to or larger than r, and smaller than (w - r) and (h - r) then...
+						if (map[xx + yy * w] == Tile.rock.id) { // If the current tile is a rock tile...
+							map[xx + yy * w] = (byte) ((Tile.ironOre.id & 0xff) + depth - 1); // Then set the ore tile (changes from Iron, Gold, & Gem depending on the depth)
 						}
 					}
 				}
 			}
 		}
 
-		if (depth < 3) {
-			int count = 0;
+		if (depth < 3) { // If the depth is smaller than 3 then...
+			int count = 0; // count of stairs
 			stairsLoop: for (int i = 0; i < w * h / 100; i++) {
-				int x = random.nextInt(w - 20) + 10;
-				int y = random.nextInt(h - 20) + 10;
+				int x = random.nextInt(w - 20) + 10; // A random number between 0 to the map's width minus 20, plus 10.
+				int y = random.nextInt(h - 20) + 10; // A random number between 0 to the map's width minus 20, plus 10.
 
-				for (int yy = y - 1; yy <= y + 1; yy++)
-					for (int xx = x - 1; xx <= x + 1; xx++) {
-						if (map[xx + yy * w] != Tile.rock.id) continue stairsLoop;
+				for (int yy = y - 1; yy <= y + 1; yy++)  // Loops if yy is smaller or equal to y + 1
+					for (int xx = x - 1; xx <= x + 1; xx++) {  // Loops if xx is smaller or equal to x + 1
+						if (map[xx + yy * w] != Tile.rock.id) continue stairsLoop; // If the current Tile is not a rock then start the main loop all over.
 					}
 
-				map[x + y * w] = Tile.stairsDown.id;
-				count++;
-				if (count == 4) break;
+				map[x + y * w] = Tile.stairsDown.id; // sets the tile to a stairsDown tile
+				count++; //increases the count value
+				if (count == 4) break; // if count is equal to 4, then stop the loop
 			}
 		}
 
-		return new byte[][] { map, data };
+		return new byte[][] { map, data };  // returns the map's tiles and data.
 	}
 
 	private static byte[][] createSkyMap(int w, int h) {
@@ -437,12 +457,13 @@ public class LevelGen {
 	}
 
 	public static void main(String[] args) {
+		int d=0;
 		while (true) {
 			int w = 128;
 			int h = 128;
 
-			byte[] map = LevelGen.createAndValidateTopMap(w, h)[0];
-			// byte[] map = LevelGen.createAndValidateUndergroundMap(w, h, (d++ % 3) + 1)[0];
+			//byte[] map = LevelGen.createAndValidateTopMap(w, h)[0];
+			 byte[] map = LevelGen.createAndValidateUndergroundMap(w, h, (d++ % 3) + 1)[0];
 			// byte[] map = LevelGen.createAndValidateSkyMap(w, h)[0];
 
 			BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);

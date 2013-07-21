@@ -102,8 +102,8 @@ public class Level {
 
 	/** This method renders all the tiles in the game */
 	public void renderBackground(Screen screen, int xScroll, int yScroll) {
-		int xo = xScroll >> 4; // the player horizontal scroll offset.
-		int yo = yScroll >> 4; // the player vertical scroll offset.
+		int xo = xScroll >> 4; // the game's horizontal scroll offset.
+		int yo = yScroll >> 4; // the game's vertical scroll offset.
 		int w = (screen.w + 15) >> 4; // width of the screen being rendered
 		int h = (screen.h + 15) >> 4; // height of the screen being rendered
 		screen.setOffset(xScroll, yScroll); // sets the scroll offsets.
@@ -119,127 +119,139 @@ public class Level {
 
 	public Player player; // the player object
 
+	/** Renders all the entity sprites on the screen */
 	public void renderSprites(Screen screen, int xScroll, int yScroll) {
-		int xo = xScroll >> 4;
-		int yo = yScroll >> 4;
-		int w = (screen.w + 15) >> 4;
-		int h = (screen.h + 15) >> 4;
+		int xo = xScroll >> 4; // the game's horizontal scroll offset.
+		int yo = yScroll >> 4; // the game's vertical scroll offset.
+		int w = (screen.w + 15) >> 4; // width of the screen being rendered
+		int h = (screen.h + 15) >> 4; // height of the screen being rendered
 
-		screen.setOffset(xScroll, yScroll);
-		for (int y = yo; y <= h + yo; y++) {
-			for (int x = xo; x <= w + xo; x++) {
-				if (x < 0 || y < 0 || x >= this.w || y >= this.h) continue;
-				rowSprites.addAll(entitiesInTiles[x + y * this.w]);
+		screen.setOffset(xScroll, yScroll); // sets the scroll offsets.
+		for (int y = yo; y <= h + yo; y++) { // loops through the vertical positions
+			for (int x = xo; x <= w + xo; x++) { // loops through the horizontal positions
+				if (x < 0 || y < 0 || x >= this.w || y >= this.h) continue; // If the x & y positions of the sprites are within the map's boundaries
+				rowSprites.addAll(entitiesInTiles[x + y * this.w]); // adds all of the sprites in the entitiesInTiles array.
 			}
-			if (rowSprites.size() > 0) {
-				sortAndRender(screen, rowSprites);
+			if (rowSprites.size() > 0) { // If the rowSprites list size is larger than 0...
+				sortAndRender(screen, rowSprites); // sorts and renders the sprites on the screen
 			}
-			rowSprites.clear();
+			rowSprites.clear(); // clears the list
 		}
-		screen.setOffset(0, 0);
+		screen.setOffset(0, 0); // resets the offset.
 	}
 
+	/** Renders the light off tiles and entities in the underground */
 	public void renderLight(Screen screen, int xScroll, int yScroll) {
-		int xo = xScroll >> 4;
-		int yo = yScroll >> 4;
-		int w = (screen.w + 15) >> 4;
-		int h = (screen.h + 15) >> 4;
+		int xo = xScroll >> 4; // the game's horizontal scroll offset.
+		int yo = yScroll >> 4; // the game's vertical scroll offset.
+		int w = (screen.w + 15) >> 4; // width of the screen being rendered
+		int h = (screen.h + 15) >> 4; // height of the screen being rendered
 
-		screen.setOffset(xScroll, yScroll);
-		int r = 4;
-		for (int y = yo - r; y <= h + yo + r; y++) {
-			for (int x = xo - r; x <= w + xo + r; x++) {
-				if (x < 0 || y < 0 || x >= this.w || y >= this.h) continue;
-				List<Entity> entities = entitiesInTiles[x + y * this.w];
-				for (int i = 0; i < entities.size(); i++) {
-					Entity e = entities.get(i);
-					int lr = e.getLightRadius();
-					if (lr > 0) screen.renderLight(e.x - 1, e.y - 4, lr * 8);
+		screen.setOffset(xScroll, yScroll); // sets the scroll offsets.
+		int r = 4; // radius that plays a part of how far away you can be before light stops rendering
+		for (int y = yo - r; y <= h + yo + r; y++) { // loops through the vertical positions + r
+			for (int x = xo - r; x <= w + xo + r; x++) { // loops through the horizontal positions + r
+				if (x < 0 || y < 0 || x >= this.w || y >= this.h) continue; // If the x & y positions of the sprites are within the map's boundaries
+				List<Entity> entities = entitiesInTiles[x + y * this.w]; // gets all the entities in the level
+				for (int i = 0; i < entities.size(); i++) { // loops through the list of entities
+					Entity e = entities.get(i); // gets the current entity
+					int lr = e.getLightRadius(); // gets the light radius from the entity.
+					if (lr > 0) screen.renderLight(e.x - 1, e.y - 4, lr * 8); // If the light radius is above 0, then render the light.
 				}
-				int lr = getTile(x, y).getLightRadius(this, x, y);
-				if (lr > 0) screen.renderLight(x * 16 + 8, y * 16 + 8, lr * 8);
+				int lr = getTile(x, y).getLightRadius(this, x, y); // gets the light radius from local tiles (like lava)
+				if (lr > 0) screen.renderLight(x * 16 + 8, y * 16 + 8, lr * 8); // if the light radius is above 0, then render the light.
 			}
 		}
-		screen.setOffset(0, 0);
+		screen.setOffset(0, 0); // resets the offset.
 	}
 
+	/** Sorts and renders sprites from an entity list */
 	private void sortAndRender(Screen screen, List<Entity> list) {
-		Collections.sort(list, spriteSorter);
-		for (int i = 0; i < list.size(); i++) {
-			list.get(i).render(screen);
+		Collections.sort(list, spriteSorter); // sorts the list by the spriteSorter
+		for (int i = 0; i < list.size(); i++) { // loops through the entity list
+			list.get(i).render(screen); // renders the sprite on the screen
 		}
 	}
 
+	/** Gets a tile from the world. */
 	public Tile getTile(int x, int y) {
-		if (x < 0 || y < 0 || x >= w || y >= h) return Tile.rock;
-		return Tile.tiles[tiles[x + y * w]];
+		if (x < 0 || y < 0 || x >= w || y >= h) return Tile.rock; // If the tile request is outside the world's boundaries (like x = -5), then returns a rock.
+		return Tile.tiles[tiles[x + y * w]]; // Returns the tile that is at the position
 	}
 
+	/** Sets a tile to the world */
 	public void setTile(int x, int y, Tile t, int dataVal) {
-		if (x < 0 || y < 0 || x >= w || y >= h) return;
-		tiles[x + y * w] = t.id;
-		data[x + y * w] = (byte) dataVal;
+		if (x < 0 || y < 0 || x >= w || y >= h) return; // If the tile request position is outside the world boundaries (like x = -1337), then stop the method.
+		tiles[x + y * w] = t.id; // Places the tile at the x & y location
+		data[x + y * w] = (byte) dataVal; // sets the data value of the tile
 	}
 
+	/** Gets the data from the x & y position */
 	public int getData(int x, int y) {
-		if (x < 0 || y < 0 || x >= w || y >= h) return 0;
-		return data[x + y * w] & 0xff;
+		if (x < 0 || y < 0 || x >= w || y >= h) return 0; // If the data request position is outside the world boundaries, then stop the method.
+		return data[x + y * w] & 0xff; // Returns the last 8 bits(& 0xff) of the data from that position.
 	}
 
+	/** Sets a data to the x & y positioned tile */
 	public void setData(int x, int y, int val) {
-		if (x < 0 || y < 0 || x >= w || y >= h) return;
-		data[x + y * w] = (byte) val;
+		if (x < 0 || y < 0 || x >= w || y >= h) return; // If the data request position is outside the world boundaries, then stop the method.
+		data[x + y * w] = (byte) val; // sets the data as a byte (8-bits) for the data.
 	}
 
+	/** Adds a entity to the level */
 	public void add(Entity entity) {
-		if (entity instanceof Player) {
-			player = (Player) entity;
+		if (entity instanceof Player) { // if the entity happens to be a player
+			player = (Player) entity; // the player object will be this entity
 		}
-		entity.removed = false;
-		entities.add(entity);
-		entity.init(this);
+		entity.removed = false; // sets the entity's removed value to false
+		entities.add(entity); // adds the entity to the entities list
+		entity.init(this); // Initializes the entity
 
-		insertEntity(entity.x >> 4, entity.y >> 4, entity);
+		insertEntity(entity.x >> 4, entity.y >> 4, entity); // inserts the entity into the world
 	}
 
-	public void remove(Entity e) {
-		entities.remove(e);
-		int xto = e.x >> 4;
-		int yto = e.y >> 4;
-		removeEntity(xto, yto, e);
+	/** Removes a entity */
+	public void remove(Entity e) { 
+		entities.remove(e); // removes the entity from the entities list
+		int xto = e.x >> 4; // gets the x position of the entity
+		int yto = e.y >> 4; // gets the y position of the entity
+		removeEntity(xto, yto, e); // removes the entity based on the x & y position.
 	}
 
+	/** Inserts an entity to the entitiesInTiles list */
 	private void insertEntity(int x, int y, Entity e) {
-		if (x < 0 || y < 0 || x >= w || y >= h) return;
-		entitiesInTiles[x + y * w].add(e);
+		if (x < 0 || y < 0 || x >= w || y >= h) return; // if the entity's position is outside the world, then stop the method.
+		entitiesInTiles[x + y * w].add(e); // adds the entity to the entitiesInTiles list array.
 	}
 
+	/** Removes an entity in the entitiesInTiles list */
 	private void removeEntity(int x, int y, Entity e) {
-		if (x < 0 || y < 0 || x >= w || y >= h) return;
-		entitiesInTiles[x + y * w].remove(e);
+		if (x < 0 || y < 0 || x >= w || y >= h) return; // if the entity's position is outside the world, then stop the method.
+		entitiesInTiles[x + y * w].remove(e); // removes the entity to the entitiesInTiles list array.
 	}
 
+	/** Tries to spawn an entity in the world */
 	public void trySpawn(int count) {
-		for (int i = 0; i < count; i++) {
-			Mob mob;
+		for (int i = 0; i < count; i++) { // Loops through the count
+			Mob mob; // the mob to be spawned
 
-			int minLevel = 1;
-			int maxLevel = 1;
-			if (depth < 0) {
-				maxLevel = (-depth) + 1;
+			int minLevel = 1; // min level (green,red,black colored mob)
+			int maxLevel = 1; // max level (green,red,black colored mob)
+			if (depth < 0) { // if the depth is smaller than 0...
+				maxLevel = (-depth) + 1; // the max level changes depending of the depth
 			}
-			if (depth > 0) {
-				minLevel = maxLevel = 4;
+			if (depth > 0) { // if the depth is larger than 0...
+				minLevel = maxLevel = 4; // the max level and the min level are 4.
 			}
 
-			int lvl = random.nextInt(maxLevel - minLevel + 1) + minLevel;
-			if (random.nextInt(2) == 0)
-				mob = new Slime(lvl);
+			int lvl = random.nextInt(maxLevel - minLevel + 1) + minLevel; // the lvl that the mob will be.
+			if (random.nextInt(2) == 0) // if a random variable (0 to 1) is equal to 0 then...
+				mob = new Slime(lvl); // mob will be a slime
 			else
-				mob = new Zombie(lvl);
+				mob = new Zombie(lvl); // else it will be a zombie
 
-			if (mob.findStartPos(this)) {
-				this.add(mob);
+			if (mob.findStartPos(this)) { // If the mob can find a start position...
+				this.add(mob); // then add the mob to the world.
 			}
 		}
 	}

@@ -17,116 +17,107 @@ import com.mojang.ld22.level.levelgen.LevelGen;
 import com.mojang.ld22.level.tile.Tile;
 
 public class Level {
-	private Random random = new Random();
+	private Random random = new Random(); // creates a random object to be used.
 
-	public int w, h;
+	public int w, h; // width and height of the level
 
-	public byte[] tiles;
-	public byte[] data;
-	public List<Entity>[] entitiesInTiles;
+	public byte[] tiles; // an array of all the tiles in the world.
+	public byte[] data; // an array of the data of the tiles in the world.
+	public List<Entity>[] entitiesInTiles; // An array of each entity in each tile in the world
 
-	public int grassColor = 141;
-	public int dirtColor = 322;
-	public int sandColor = 550;
-	private int depth;
-	public int monsterDensity = 8;
+	public int grassColor = 141; // color of grass
+	public int dirtColor = 322; // color of dirt
+	public int sandColor = 550; // color of sand
+	private int depth; // depth level of the level
+	public int monsterDensity = 8; // affects the number of monsters that are on the level, bigger the number the less monsters spawn.
 
-	public List<Entity> entities = new ArrayList<Entity>();
-	private Comparator<Entity> spriteSorter = new Comparator<Entity>() {
-		public int compare(Entity e0, Entity e1) {
-			if (e1.y < e0.y) return +1;
-			if (e1.y > e0.y) return -1;
-			return 0;
+	public List<Entity> entities = new ArrayList<Entity>(); // A list of all the entities in the world
+	private Comparator<Entity> spriteSorter = new Comparator<Entity>() { // creates a sorter for all the entities to be rendered.
+		public int compare(Entity e0, Entity e1) { // compares 2 entities
+			if (e1.y < e0.y) return +1; // If the y position of the first entity is less (higher up) than the second entity, then it will be moved up in sorting.
+			if (e1.y > e0.y) return -1; // If the y position of the first entity is more (lower) than the second entity, then it will be moved down in sorting.
+			return 0; // ends the method
 		}
-
 	};
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("unchecked") // @SuppressWarnings ignores the warnings (yellow underline) in this method.
+	/** Level which the world is contained in */
 	public Level(int w, int h, int level, Level parentLevel) {
-		if (level < 0) {
-			dirtColor = 222;
+		if (level < 0) { // If the level is less than 0...
+			dirtColor = 222; // dirt Color will become gray (222)
 		}
-		this.depth = level;
-		this.w = w;
-		this.h = h;
-		byte[][] maps;
+		this.depth = level; // assigns the depth variable
+		this.w = w; // assigns the width
+		this.h = h; // assigns the height
+		byte[][] maps; // multidimensional array (an array within a array), used for the map
 
-		if (level == 1) {
-			dirtColor = 444;
-		}
-		if (level == 0)
-			maps = LevelGen.createAndValidateTopMap(w, h);
-		else if (level < 0) {
-			maps = LevelGen.createAndValidateUndergroundMap(w, h, -level);
-			monsterDensity = 4;
-		} else {
-			maps = LevelGen.createAndValidateSkyMap(w, h); // Sky level
-			monsterDensity = 4;
+		if (level == 0) // If the level is 0 (surface)...
+			maps = LevelGen.createAndValidateTopMap(w, h); // create a surface map for the level
+		else if (level < 0) { // if the level is less than 0 (underground)...
+			maps = LevelGen.createAndValidateUndergroundMap(w, h, -level); // create a underground map (depending on the level)
+			monsterDensity = 4; // lowers the monsterDensity value, which makes more enemies spawn
+		} else { // if level is anything else, aka: above 0 (sky) then...
+			maps = LevelGen.createAndValidateSkyMap(w, h);  // creates a sky map
+			monsterDensity = 4; // lowers the monsterDensity value, which makes more enemies spawn
 		}
 
-		tiles = maps[0];
-		data = maps[1];
+		tiles = maps[0]; // assigns the tiles in the map
+		data = maps[1]; // assigns the data of the tiles
 
-		if (parentLevel != null) {
-			for (int y = 0; y < h; y++)
-				for (int x = 0; x < w; x++) {
-					if (parentLevel.getTile(x, y) == Tile.stairsDown) {
+		if (parentLevel != null) { // If the level above this one is not null (aka, not sky)
+			for (int y = 0; y < h; y++) // Loops through the height of the map
+				for (int x = 0; x < w; x++) { // Loops through the width of the map
+					if (parentLevel.getTile(x, y) == Tile.stairsDown) { // If the tile in the level above the current one is a stairs down then...
 
-						setTile(x, y, Tile.stairsUp, 0);
-						if (level == 0) {
-							setTile(x - 1, y, Tile.hardRock, 0);
-							setTile(x + 1, y, Tile.hardRock, 0);
-							setTile(x, y - 1, Tile.hardRock, 0);
-							setTile(x, y + 1, Tile.hardRock, 0);
-							setTile(x - 1, y - 1, Tile.hardRock, 0);
-							setTile(x - 1, y + 1, Tile.hardRock, 0);
-							setTile(x + 1, y - 1, Tile.hardRock, 0);
-							setTile(x + 1, y + 1, Tile.hardRock, 0);
-						} else {
-							setTile(x - 1, y, Tile.dirt, 0);
-							setTile(x + 1, y, Tile.dirt, 0);
-							setTile(x, y - 1, Tile.dirt, 0);
-							setTile(x, y + 1, Tile.dirt, 0);
-							setTile(x - 1, y - 1, Tile.dirt, 0);
-							setTile(x - 1, y + 1, Tile.dirt, 0);
-							setTile(x + 1, y - 1, Tile.dirt, 0);
-							setTile(x + 1, y + 1, Tile.dirt, 0);
-						}
+						setTile(x, y, Tile.stairsUp, 0); // set a stairs up tile in the same position on the current level
+						
+						Tile tile = Tile.dirt; // assigns a tile to be a dirt
+						if(level == 0) tile = Tile.hardRock; // if the level is 0 (surface) then reassign the tile to be a hard rock.
+						
+						setTile(x - 1, y, tile, 0); // places the tile to the left of the stairs.
+						setTile(x + 1, y, tile, 0); // places the tile to the right of the stairs.
+						setTile(x, y - 1, tile, 0); // places the tile to the above of the stairs.
+						setTile(x, y + 1, tile, 0); // places the tile to the below of the stairs.
+						setTile(x - 1, y - 1, tile, 0); // places the tile to the upper-left position of the stairs.
+						setTile(x - 1, y + 1, tile, 0); // places the tile to the lower-left position of the stairs.
+						setTile(x + 1, y - 1, tile, 0); // places the tile to the upper-right position of the stairs.
+						setTile(x + 1, y + 1, tile, 0); // places the tile to the lower-right position of the stairs.
 					}
 
 				}
 		}
 
-		entitiesInTiles = new ArrayList[w * h];
-		for (int i = 0; i < w * h; i++) {
-			entitiesInTiles[i] = new ArrayList<Entity>();
+		entitiesInTiles = new ArrayList[w * h]; // Creates a new arrayList with the size of width * height.
+		for (int i = 0; i < w * h; i++) { // Loops (width * height) times
+			entitiesInTiles[i] = new ArrayList<Entity>(); // Adds a entity list in that tile.
 		}
 		
-		if (level==1) {
-			AirWizard aw = new AirWizard();
-			aw.x = w*8;
-			aw.y = h*8;
-			add(aw);
+		if (level==1) { // If the level is 1 (sky) then...
+			AirWizard aw = new AirWizard(); // Create the air wizard
+			aw.x = w*8; // set his position to the middle of the map (x-position)
+			aw.y = h*8; // set his position to the middle of the map (y-position)
+			add(aw); // adds the air wizard to the level
 		}
 	}
 
+	/** This method renders all the tiles in the game */
 	public void renderBackground(Screen screen, int xScroll, int yScroll) {
-		int xo = xScroll >> 4;
-		int yo = yScroll >> 4;
-		int w = (screen.w + 15) >> 4;
-		int h = (screen.h + 15) >> 4;
-		screen.setOffset(xScroll, yScroll);
-		for (int y = yo; y <= h + yo; y++) {
-			for (int x = xo; x <= w + xo; x++) {
-				getTile(x, y).render(screen, this, x, y);
+		int xo = xScroll >> 4; // the player horizontal scroll offset.
+		int yo = yScroll >> 4; // the player vertical scroll offset.
+		int w = (screen.w + 15) >> 4; // width of the screen being rendered
+		int h = (screen.h + 15) >> 4; // height of the screen being rendered
+		screen.setOffset(xScroll, yScroll); // sets the scroll offsets.
+		for (int y = yo; y <= h + yo; y++) { // loops through the vertical positions
+			for (int x = xo; x <= w + xo; x++) { // loops through the horizontal positions
+				getTile(x, y).render(screen, this, x, y); // renders the tile on the screen
 			}
 		}
-		screen.setOffset(0, 0);
+		screen.setOffset(0, 0); // resets the offset.
 	}
 
-	private List<Entity> rowSprites = new ArrayList<Entity>();
+	private List<Entity> rowSprites = new ArrayList<Entity>(); // list of entities to be rendered
 
-	public Player player;
+	public Player player; // the player object
 
 	public void renderSprites(Screen screen, int xScroll, int yScroll) {
 		int xo = xScroll >> 4;
@@ -162,7 +153,6 @@ public class Level {
 				List<Entity> entities = entitiesInTiles[x + y * this.w];
 				for (int i = 0; i < entities.size(); i++) {
 					Entity e = entities.get(i);
-					// e.render(screen);
 					int lr = e.getLightRadius();
 					if (lr > 0) screen.renderLight(e.x - 1, e.y - 4, lr * 8);
 				}
@@ -172,10 +162,6 @@ public class Level {
 		}
 		screen.setOffset(0, 0);
 	}
-
-	// private void renderLight(Screen screen, int x, int y, int r) {
-	// screen.renderLight(x, y, r);
-	// }
 
 	private void sortAndRender(Screen screen, List<Entity> list) {
 		Collections.sort(list, spriteSorter);

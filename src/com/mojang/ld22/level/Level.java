@@ -256,52 +256,54 @@ public class Level {
 		}
 	}
 
+	/** Update method, updates (ticks) 60 times a second */
 	public void tick() {
-		trySpawn(1);
-
-		for (int i = 0; i < w * h / 50; i++) {
-			int xt = random.nextInt(w);
-			int yt = random.nextInt(w);
-			getTile(xt, yt).tick(this, xt, yt);
+		trySpawn(1); // tries to spawn 1 mob.
+		
+		for (int i = 0; i < w * h / 50; i++) { // Loops (Width * Height / 50) times
+			int xt = random.nextInt(w); // Finds a random value from 0 to (Width - 1)
+			int yt = random.nextInt(h); // Finds a random value from 0 to (Height - 1)
+			getTile(xt, yt).tick(this, xt, yt); // updates the tile at that location.
 		}
-		for (int i = 0; i < entities.size(); i++) {
-			Entity e = entities.get(i);
-			int xto = e.x >> 4;
-			int yto = e.y >> 4;
+		for (int i = 0; i < entities.size(); i++) { // Loops through all the entities inside the entities list
+			Entity e = entities.get(i); // the current entity
+			int xto = e.x >> 4; // gets the entity's x coordinate
+			int yto = e.y >> 4; // gets the entity's y coordinate
 
-			e.tick();
+			e.tick(); // calls the entity's tick() method.
 
-			if (e.removed) {
-				entities.remove(i--);
-				removeEntity(xto, yto, e);
-			} else {
-				int xt = e.x >> 4;
-				int yt = e.y >> 4;
+			if (e.removed) { // if the entity's removed value is true...
+				entities.remove(i--); // removes the entity from the entities list and makes the list smaller.
+				removeEntity(xto, yto, e); // Removes the entity from the world
+			} else { // if the entity's removed value is false...
+				int xt = e.x >> 4; // gets the entity's x coordinate
+				int yt = e.y >> 4; // gets the entity's y coordinate
 
-				if (xto != xt || yto != yt) {
-					removeEntity(xto, yto, e);
-					insertEntity(xt, yt, e);
+				if (xto != xt || yto != yt) { // If xto and xt, & yto and yt don't match... 
+					removeEntity(xto, yto, e); // remove the entity from xto & yto position 
+					insertEntity(xt, yt, e); // adds the entity at the xt & yt position
 				}
 			}
 		}
 	}
 
+	/** Gets all the entities from a square area of 4 points. */
 	public List<Entity> getEntities(int x0, int y0, int x1, int y1) {
-		List<Entity> result = new ArrayList<Entity>();
-		int xt0 = (x0 >> 4) - 1;
-		int yt0 = (y0 >> 4) - 1;
-		int xt1 = (x1 >> 4) + 1;
-		int yt1 = (y1 >> 4) + 1;
-		for (int y = yt0; y <= yt1; y++) {
-			for (int x = xt0; x <= xt1; x++) {
-				if (x < 0 || y < 0 || x >= w || y >= h) continue;
-				List<Entity> entities = entitiesInTiles[x + y * this.w];
-				for (int i = 0; i < entities.size(); i++) {
-					Entity e = entities.get(i);
-					if (e.intersects(x0, y0, x1, y1)) result.add(e);
+		List<Entity> result = new ArrayList<Entity>(); // result list of entities
+		int xt0 = (x0 >> 4) - 1; // location of x0
+		int yt0 = (y0 >> 4) - 1; // location of y0
+		int xt1 = (x1 >> 4) + 1; // location of x1
+		int yt1 = (y1 >> 4) + 1; // location of y1
+		for (int y = yt0; y <= yt1; y++) { // Loops through the difference between y0 and y1
+			for (int x = xt0; x <= xt1; x++) { // Loops through the difference between x0 & x1
+				if (x < 0 || y < 0 || x >= w || y >= h) continue; // if the x & y position is outside the world, then skip the rest of this loop.
+				List<Entity> entities = entitiesInTiles[x + y * this.w]; // gets the entity from the x & y position
+				for (int i = 0; i < entities.size(); i++) { // Loops through all the entities in the entities list
+					Entity e = entities.get(i); // gets the current entity
+					if (e.intersects(x0, y0, x1, y1)) result.add(e); // if the entity intersects these 4 points, then add it to the result list.
 				}
 			}
 		}
-		return result;
+		return result; // returns the result list of entities
 	}
 }

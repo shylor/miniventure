@@ -55,7 +55,7 @@ public class Slime extends Mob {
 		super.die(); // Parent death call
 
 		int count = random.nextInt(2) + 1; // Random amount of slime(item) to drop from 1 to 2
-		for (int i = 0; i < count; i++) { // loops through the loop count
+		for (int i = 0; i < count; i++) { // loops through the count
 			level.add(new ItemEntity(new ResourceItem(Resource.slime), x + random.nextInt(11) - 5, y + random.nextInt(11) - 5)); //creates slime items
 		}
 

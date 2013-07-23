@@ -12,8 +12,8 @@ public class Slime extends Mob {
 
 	public Slime(int lvl) {
 		this.lvl = lvl; // level is passed through constructor
-		x = random.nextInt(64 * 16); // give it a random position
-		y = random.nextInt(64 * 16);
+		x = random.nextInt(64 * 16); // gives it a random x position anywhere between (0 to 1023) [Tile position (0 to 64)]
+		y = random.nextInt(64 * 16); // gives it a random y position anywhere between (0 to 1023) [Tile position (0 to 64)]
 		health = maxHealth = lvl * lvl * 5; // Health based on level
 	}
 
@@ -26,14 +26,17 @@ public class Slime extends Mob {
 				xa = (random.nextInt(3) - 1); // Sets direction randomly from -1 to 1
 				ya = (random.nextInt(3) - 1);
 
-				if (level.player != null) { // if player exists on my level
-					int xd = level.player.x - x; // get the distance between slime and the player
-					int yd = level.player.y - y;
+				if (level.player != null) { // if player exists on the level
+					int xd = level.player.x - x; // gets the horizontal distance between the slime and the player
+					int yd = level.player.y - y; // gets the vertical distance between the slime and the player 
+					
+					/* If the horizontal distance² + vertical distance² is smaller than 50² then...*/
 					if (xd * xd + yd * yd < 50 * 50) { // Notch is an evil man who should be punished for this line of code, it seems to test the distance between slime and the player
-						if (xd < 0) xa = -1; // set which direction the slime should jump
-						if (xd > 0) xa = +1;
-						if (yd < 0) ya = -1;
-						if (yd > 0) ya = +1;
+						// Why is notch evil for making that line of code? :o -David
+						if (xd < 0) xa = -1; // if the horizontal difference is smaller than 0, then the x acceleration will be 1 (negative direction)
+						if (xd > 0) xa = +1; // if the horizontal difference is larger than 0, then the x acceleration will be 1
+						if (yd < 0) ya = -1; // if the vertical difference is smaller than 0, then the y acceleration will be 1 (negative direction)
+						if (yd > 0) ya = +1; // if the vertical difference is larger than 0, then the y acceleration will be 1
 					}
 
 				}
@@ -42,7 +45,7 @@ public class Slime extends Mob {
 			}
 		}
 
-		jumpTime--; //lower jump time
+		jumpTime--; //lower jump time by 1
 		if (jumpTime == 0) { // when our jump has ended
 			xa = ya = 0; // reset direction to 0
 		}
@@ -51,8 +54,8 @@ public class Slime extends Mob {
 	protected void die() {
 		super.die(); // Parent death call
 
-		int count = random.nextInt(2) + 1; // Random amount of slime(item) to drop
-		for (int i = 0; i < count; i++) {
+		int count = random.nextInt(2) + 1; // Random amount of slime(item) to drop from 1 to 2
+		for (int i = 0; i < count; i++) { // loops through the loop count
 			level.add(new ItemEntity(new ResourceItem(Resource.slime), x + random.nextInt(11) - 5, y + random.nextInt(11) - 5)); //creates slime items
 		}
 
@@ -63,30 +66,34 @@ public class Slime extends Mob {
 	}
 
 	public void render(Screen screen) {
-		int xt = 0; //our texture in the png file
-		int yt = 18;
+		/* our texture in the png file */
+		int xt = 0; // X tile coordinate in the sprite-sheet
+		int yt = 18; // Y tile coordinate in the sprite-sheet
 
-		int xo = x - 8; // where to draw the sprite reletive to our position
-		int yo = y - 11;
+	    /* where to draw the sprite relative to our position */
+		int xo = x - 8; // the horizontal location to start drawing the sprite
+		int yo = y - 11; // the vertical location to start drawing the sprite
 
 		if (jumpTime > 0) { // if jumping
 			xt += 2; // change sprite
 			yo -= 4; // draw sprite a little higher
 		}
 
-		int col = Color.get(-1, 10, 252, 555); // lvl 1 colour
-		if (lvl == 2) col = Color.get(-1, 100, 522, 555); // lvl 2 colour
-		if (lvl == 3) col = Color.get(-1, 111, 444, 555); // lvl 3 colour
-		if (lvl == 4) col = Color.get(-1, 000, 111, 224); // lvl 4 colour
+		int col = Color.get(-1, 10, 252, 555); // lvl 1 colour (Green)
+		if (lvl == 2) col = Color.get(-1, 100, 522, 555); // lvl 2 colour (Red)
+		if (lvl == 3) col = Color.get(-1, 111, 444, 555); // lvl 3 colour (Gray)
+		if (lvl == 4) col = Color.get(-1, 000, 111, 224); // lvl 4 colour (Black/Dark Gray)
 
 		if (hurtTime > 0) { // if hurt
 			col = Color.get(-1, 555, 555, 555); // make our colour white
 		}
 
-		screen.render(xo + 0, yo + 0, xt + yt * 32, col, 0); // Draws the sprite as 4 different 8*8 images instead of one 16*16 image, really weird, probably an artifact from the zombies and the players render code
-		screen.render(xo + 8, yo + 0, xt + 1 + yt * 32, col, 0);
-		screen.render(xo + 0, yo + 8, xt + (yt + 1) * 32, col, 0);
-		screen.render(xo + 8, yo + 8, xt + 1 + (yt + 1) * 32, col, 0);
+		/* Draws the sprite as 4 different 8*8 images instead of one 16*16 image, really weird, probably an artifact from the zombies and the players render code */
+		/* Well, it draws the 8*8 images because the screen.render() method is stupid :) - David */
+		screen.render(xo + 0, yo + 0, xt + yt * 32, col, 0); // draws the top-left tile
+		screen.render(xo + 8, yo + 0, xt + 1 + yt * 32, col, 0); // draws the top-right tile
+		screen.render(xo + 0, yo + 8, xt + (yt + 1) * 32, col, 0); // draws the bottom-left tile
+		screen.render(xo + 8, yo + 8, xt + 1 + (yt + 1) * 32, col, 0); // draws the bottom-right tile
 	}
 
 	protected void touchedBy(Entity entity) {

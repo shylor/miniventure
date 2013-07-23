@@ -5,7 +5,8 @@ Miniventures is developed by PlayMinicraft and other developers. Our goals are t
 
 Current Team<br>
 Shylor (PlayMinicraft)<br>
-David (Minicraft+)
+David (Minicraft+)<br>
+Pirate-Rob (Does nothing)
 
 Roadmap
 ------------------

@@ -53,6 +53,7 @@ public class Spark extends Entity {
 
 	/** Renders the spark on the screen */
 	public void render(Screen screen) {
+		/* this first part is for the blinking effect */
 		if (time >= lifeTime - 6 * 20) {// if time is larger or equal to lifeTime - 6 * 20 then...
 			if (time / 6 % 2 == 0) return; // if the remainder of (time/6)/2 = 0 then skip the rest of the code.
 		}

@@ -20,118 +20,123 @@ import com.mojang.ld22.screen.InventoryMenu;
 import com.mojang.ld22.sound.Sound;
 
 public class Player extends Mob {
-	private InputHandler input;
-	private int attackTime, attackDir;
+	private InputHandler input; // keyboard input by the player
+	private int attackTime, attackDir; // the time and direction of an attack.
 
-	public Game game;
-	public Inventory inventory = new Inventory();
-	public Item attackItem;
-	public Item activeItem;
-	public int stamina;
-	public int staminaRecharge;
-	public int staminaRechargeDelay;
-	public int score;
-	public int maxStamina = 10;
-	private int onStairDelay;
-	public int invulnerableTime = 0;
-
+	public Game game; // the game the player is in
+	public Inventory inventory = new Inventory(); // the inventory of the player
+	public Item attackItem; // the player's attack item
+	public Item activeItem; // the player's active item
+	public int stamina; // the player's stamina
+	public int staminaRecharge; // the recharge rate of the player's stamina
+	public int staminaRechargeDelay; // the recharge delay when the player uses up their stamina.
+	public int score; // the player's score
+	public int maxStamina = 10; // the maximum stamina that the player can have
+	private int onStairDelay; // the delay before changing levels.
+	public int invulnerableTime = 0; // the invulnerability time the player has when he is hit
+	// Note: the player's health & max health are inherited from Mob.java
+	
 	public Player(Game game, InputHandler input) {
-		this.game = game;
-		this.input = input;
-		x = 24;
-		y = 24;
-		stamina = maxStamina;
+		this.game = game; // assigns the game that the player is in
+		this.input = input; // assigns the input
+		x = 24; // players x position
+		y = 24; // players y position
+		stamina = maxStamina; // assigns the stamina to be the max stamina (10)
 
-		inventory.add(new FurnitureItem(new Workbench()));
-		inventory.add(new PowerGloveItem());
+		inventory.add(new FurnitureItem(new Workbench())); // adds a workbench to the player's inventory
+		inventory.add(new PowerGloveItem()); // adds a power glove to the player's inventory
 	}
 
 	public void tick() {
-		super.tick();
+		super.tick(); // ticks the parent (Mob.java)
 
-		if (invulnerableTime > 0) invulnerableTime--;
-		Tile onTile = level.getTile(x >> 4, y >> 4);
-		if (onTile == Tile.stairsDown || onTile == Tile.stairsUp) {
-			if (onStairDelay == 0) {
-				changeLevel((onTile == Tile.stairsUp) ? 1 : -1);
-				onStairDelay = 10;
-				return;
+		if (invulnerableTime > 0) invulnerableTime--; // if invulnerableTime is above 0, then minus it by 1.
+		Tile onTile = level.getTile(x >> 4, y >> 4); // gets the current tile the player is on.
+		if (onTile == Tile.stairsDown || onTile == Tile.stairsUp) { // if the tile is a stairs up or stairs down...
+			if (onStairDelay == 0) { // if the stair delay is 0 then...
+				changeLevel((onTile == Tile.stairsUp) ? 1 : -1); // change level depending on if the Tile is an stairsUp or not.
+				onStairDelay = 10; // creates a stair delay of 10.
+				return; // skips the rest of the code
 			}
-			onStairDelay = 10;
+			onStairDelay = 10; // stair delay is set to 10.
 		} else {
-			if (onStairDelay > 0) onStairDelay--;
+			if (onStairDelay > 0) onStairDelay--; // if stair delay is above 0, then minus it by 1.
 		}
 
+		/* if stamina is smaller or equal to 0, and if the recharge & recharge delay are both 0 then...  */
 		if (stamina <= 0 && staminaRechargeDelay == 0 && staminaRecharge == 0) {
-			staminaRechargeDelay = 40;
+			staminaRechargeDelay = 40; // the recharge delay will equal 40 
 		}
 
-		if (staminaRechargeDelay > 0) {
-			staminaRechargeDelay--;
+		if (staminaRechargeDelay > 0) { // if the recharge delay is above 0 then...
+			staminaRechargeDelay--; // minus the recharge delay by 1.
 		}
 
-		if (staminaRechargeDelay == 0) {
-			staminaRecharge++;
-			if (isSwimming()) {
-				staminaRecharge = 0;
+		if (staminaRechargeDelay == 0) { // if the stamina recharge delay is 0 then...
+			staminaRecharge++; // the stamina recharge adds up.
+			if (isSwimming()) { // if the player is swimming then...
+				staminaRecharge = 0; // the recharge is 0.
 			}
-			while (staminaRecharge > 10) {
-				staminaRecharge -= 10;
-				if (stamina < maxStamina) stamina++;
-			}
-		}
-
-		int xa = 0;
-		int ya = 0;
-		if (input.up.down) ya--;
-		if (input.down.down) ya++;
-		if (input.left.down) xa--;
-		if (input.right.down) xa++;
-		if (isSwimming() && tickTime % 60 == 0) {
-			if (stamina > 0) {
-				stamina--;
-			} else {
-				hurt(this, 1, dir ^ 1);
+			while (staminaRecharge > 10) { // while the stamina recharge is above 10 then...
+				staminaRecharge -= 10; // minus the recharge by 10
+				if (stamina < maxStamina) stamina++; // if the player's stamina is less than their max stamina then add 1 stamina.
 			}
 		}
 
-		if (staminaRechargeDelay % 2 == 0) {
-			move(xa, ya);
-		}
-
-		if (input.attack.clicked) {
-			if (stamina == 0) {
-
-			} else {
-				stamina--;
-				staminaRecharge = 0;
-				attack();
+		int xa = 0; // x acceleration
+		int ya = 0; // y acceleration
+		if (input.up.down) ya--; // if the player presses up then his y acceleration will be -1
+		if (input.down.down) ya++; // if the player presses down then his y acceleration will be 1
+		if (input.left.down) xa--; // if the player presses left then his x acceleration will be -1
+		if (input.right.down) xa++; // if the player presses up right his x acceleration will be 1
+		
+		if (isSwimming() && tickTime % 60 == 0) { // if the player is swimming and the remainder of (tickTime/60) equals 0 then...
+			if (stamina > 0) { // if stamina is above 0 then...
+				stamina--; // minus 0 by 1.
+			} else { // else
+				hurt(this, 1, dir ^ 1); // do 1 damage to the player
 			}
 		}
-		if (input.menu.clicked) {
-			if (!use()) {
-				game.setMenu(new InventoryMenu(this));
+
+		if (staminaRechargeDelay % 2 == 0) { // if the remainder of (staminaRechargeDelay/2) equals 0 then...
+			move(xa, ya); // move the player in the x & y acceleration
+		}
+
+		if (input.attack.clicked) { // if the player presses the attack button...
+			if (stamina == 0) { // if the player's stamina is 0...
+				// nothing
+			} else { // if the player's stamina is larger than 0 then...
+				stamina--; // minus the stamina by 1
+				staminaRecharge = 0; // the recharge is set to 0
+				attack(); // calls the attack() method
 			}
 		}
-		if (attackTime > 0) attackTime--;
+		
+		if (input.menu.clicked) { // if the player presses the menu button...
+			if (!use()) { // if the use() method returns false then (aka: no furniture in-front of the player)
+				game.setMenu(new InventoryMenu(this)); // set the current menu to the inventory menu
+			}
+		}
+		
+		if (attackTime > 0) attackTime--; // if the attack time is larger than 0 then minus it by 1
 
 	}
 
 	private boolean use() {
-		int yo = -2;
-		if (dir == 0 && use(x - 8, y + 4 + yo, x + 8, y + 12 + yo)) return true;
-		if (dir == 1 && use(x - 8, y - 12 + yo, x + 8, y - 4 + yo)) return true;
-		if (dir == 3 && use(x + 4, y - 8 + yo, x + 12, y + 8 + yo)) return true;
-		if (dir == 2 && use(x - 12, y - 8 + yo, x - 4, y + 8 + yo)) return true;
+		System.out.println(dir);
+		if (dir == 0 && use(x - 8, y + 4 - 2, x + 8, y + 12 - 2)) return true; // if the entity below has a use() method then return true
+		if (dir == 1 && use(x - 8, y - 12 - 2, x + 8, y - 4 - 2)) return true; // if the entity above has a use() method then return true
+		if (dir == 3 && use(x + 4, y - 8 - 2, x + 12, y + 8 - 2)) return true; // if the entity to the right has a use() method then return true
+		if (dir == 2 && use(x - 12, y - 8 - 2, x - 4, y + 8 - 2)) return true; // if the entity to the left has a use() method then return true
 
-		int xt = x >> 4;
-		int yt = (y + yo) >> 4;
-		int r = 12;
-		if (attackDir == 0) yt = (y + r + yo) >> 4;
-		if (attackDir == 1) yt = (y - r + yo) >> 4;
+		int xt = x >> 4; // the x tile coordinate
+		int yt = (y - 2) >> 4; // the y tile coordinate
+		int r = 12; // radius
+		if (attackDir == 0) yt = (y + r - 2) >> 4; 
+		if (attackDir == 1) yt = (y - r - 2) >> 4;
 		if (attackDir == 2) xt = (x - r) >> 4;
 		if (attackDir == 3) xt = (x + r) >> 4;
-
+		
 		if (xt >= 0 && yt >= 0 && xt < level.w && yt < level.h) {
 			if (level.getTile(xt, yt).use(level, xt, yt, this, attackDir)) return true;
 		}
@@ -203,11 +208,12 @@ public class Player extends Mob {
 
 	}
 
+	/** if the entity in-front of the player has a use() method, it will call it. */
 	private boolean use(int x0, int y0, int x1, int y1) {
-		List<Entity> entities = level.getEntities(x0, y0, x1, y1);
-		for (int i = 0; i < entities.size(); i++) {
-			Entity e = entities.get(i);
-			if (e != this) if (e.use(this, attackDir)) return true;
+		List<Entity> entities = level.getEntities(x0, y0, x1, y1); // gets the entities within the 4 points
+		for (int i = 0; i < entities.size(); i++) { // cycles through the entities
+			Entity e = entities.get(i); // gets the current entity
+			if (e != this) if (e.use(this, attackDir)) return true; // if the entity is not the player, and has a use() method then return true.
 		}
 		return false;
 	}

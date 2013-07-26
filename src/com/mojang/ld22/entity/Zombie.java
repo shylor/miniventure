@@ -34,7 +34,9 @@ public class Zombie extends Mob {
 			}
 		}
 
-		int speed = tickTime & 1; //halp david! I have no idea what the & sign does in maths! Unless it's a bit opereator, in which case I'm rusty
+		//halp david! I have no idea what the & sign does in maths! Unless it's a bit opereator, in which case I'm rusty
+		// Calm down, go google "java bitwise AND operator" for information about this. -David
+		int speed = tickTime & 1; // Speed is either 0 or 1 depending on the tickTime
 		if (!move(xa * speed, ya * speed) || random.nextInt(200) == 0) { //moves the zombie, doubles as a check to see if it's still moving -OR- random chance out of 200
 			randomWalkTime = 60; // sets the not-so-random walk time to 60
 			xa = (random.nextInt(3) - 1) * random.nextInt(2); //sets the acceleration to random i.e. idling code
@@ -48,16 +50,17 @@ public class Zombie extends Mob {
 		int xt = 0; // X tile coordinate in the sprite-sheet
 		int yt = 14; // Y tile coordinate in the sprite-sheet
 
-		int flip1 = (walkDist >> 3) & 1; //halp david!
-		int flip2 = (walkDist >> 3) & 1; //halp david!
-
+		// change the 3 in (walkDist >> 3) to change the time it will take to switch sprites. (bigger number = longer time).
+		int flip1 = (walkDist >> 3) & 1; // This will either be a 1 or a 0 depending on the walk distance (Used for walking effect by mirroring the sprite)
+		int flip2 = (walkDist >> 3) & 1; // This will either be a 1 or a 0 depending on the walk distance (Used for walking effect by mirroring the sprite)
+		
 		if (dir == 1) { //if facing up
 			xt += 2; //change sprite to up
 		}
 		if (dir > 1) { // if facing left or down
 
 			flip1 = 0; // controls flipping left and right
-			flip2 = ((walkDist >> 4) & 1); //halp david!
+			flip2 = ((walkDist >> 4) & 1); // This will either be a 1 or a 0 depending on the walk distance (Used for walking effect by mirroring the sprite)
 			if (dir == 2) { // if facing left
 				flip1 = 1; // flip the sprite so it looks like we are facing left
 			}
@@ -70,7 +73,7 @@ public class Zombie extends Mob {
 
 		int col = Color.get(-1, 10, 252, 050); // lvl 1 colour green
 		if (lvl == 2) col = Color.get(-1, 100, 522, 050); // lvl 2 colour pink
-		if (lvl == 3) col = Color.get(-1, 111, 444, 050);
+		if (lvl == 3) col = Color.get(-1, 111, 444, 050); // lvl 3 light gray
 		if (lvl == 4) col = Color.get(-1, 000, 111, 020); // lvl 4 dark grey
 		if (hurtTime > 0) { // if hurt
 			col = Color.get(-1, 555, 555, 555); //make our colour white
@@ -84,8 +87,8 @@ public class Zombie extends Mob {
 	}
 
 	protected void touchedBy(Entity entity) {
-		if (entity instanceof Player) { // if we touch player
-			entity.hurt(this, lvl + 1, dir); // attack
+		if (entity instanceof Player) { // if the entity touches the player
+			entity.hurt(this, lvl + 1, dir); // hurts the player, damage is based on lvl.
 		}
 	}
 

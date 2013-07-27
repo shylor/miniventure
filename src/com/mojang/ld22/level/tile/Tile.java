@@ -88,11 +88,6 @@ public class Tile {
 		return false;
 	}
 
-	/** Useless method? Doesn't seem to be used in the tiles */
-	public boolean use(Level level, int xt, int yt, Player player, int attackDir) {
-		return false;
-	}
-
 	/** Sees if the tile connects to Water or Lava. */
 	public boolean connectsToLiquid() {
 		return connectsToWater || connectsToLava;

@@ -123,86 +123,74 @@ public class Player extends Mob {
 	}
 
 	private boolean use() {
-		System.out.println(dir);
 		if (dir == 0 && use(x - 8, y + 4 - 2, x + 8, y + 12 - 2)) return true; // if the entity below has a use() method then return true
 		if (dir == 1 && use(x - 8, y - 12 - 2, x + 8, y - 4 - 2)) return true; // if the entity above has a use() method then return true
 		if (dir == 3 && use(x + 4, y - 8 - 2, x + 12, y + 8 - 2)) return true; // if the entity to the right has a use() method then return true
 		if (dir == 2 && use(x - 12, y - 8 - 2, x - 4, y + 8 - 2)) return true; // if the entity to the left has a use() method then return true
-
-		int xt = x >> 4; // the x tile coordinate
-		int yt = (y - 2) >> 4; // the y tile coordinate
-		int r = 12; // radius
-		if (attackDir == 0) yt = (y + r - 2) >> 4; 
-		if (attackDir == 1) yt = (y - r - 2) >> 4;
-		if (attackDir == 2) xt = (x - r) >> 4;
-		if (attackDir == 3) xt = (x + r) >> 4;
-		
-		if (xt >= 0 && yt >= 0 && xt < level.w && yt < level.h) {
-			if (level.getTile(xt, yt).use(level, xt, yt, this, attackDir)) return true;
-		}
-
 		return false;
 	}
 
+	
 	private void attack() {
-		walkDist += 8;
-		attackDir = dir;
-		attackItem = activeItem;
-		boolean done = false;
+		walkDist += 8; // increase the walkDist (changes the sprite)
+		attackDir = dir; // the attack direction equals the current direction
+		attackItem = activeItem; // the attackItem is the active item
+		boolean done = false; // not done.
 
-		if (activeItem != null) {
-			attackTime = 10;
-			int yo = -2;
-			int range = 12;
+		if (activeItem != null) { // if the player has a active Item
+			attackTime = 10; // attack time will be set to 10.
+			int yo = -2; // y offset
+			int range = 12; // range from an object
+			/* if the interaction between you and an entity is successful then done = true */
 			if (dir == 0 && interact(x - 8, y + 4 + yo, x + 8, y + range + yo)) done = true;
 			if (dir == 1 && interact(x - 8, y - range + yo, x + 8, y - 4 + yo)) done = true;
 			if (dir == 3 && interact(x + 4, y - 8 + yo, x + range, y + 8 + yo)) done = true;
 			if (dir == 2 && interact(x - range, y - 8 + yo, x - 4, y + 8 + yo)) done = true;
-			if (done) return;
+			if (done) return; // if done = true, then skip the rest of the code.
 
-			int xt = x >> 4;
-			int yt = (y + yo) >> 4;
-			int r = 12;
-			if (attackDir == 0) yt = (y + r + yo) >> 4;
-			if (attackDir == 1) yt = (y - r + yo) >> 4;
-			if (attackDir == 2) xt = (x - r) >> 4;
-			if (attackDir == 3) xt = (x + r) >> 4;
+			int xt = x >> 4; // current x-tile coordinate you are on.
+			int yt = (y + yo) >> 4; // current y-tile coordinate you are on.
+			int r = 12; // radius 
+			if (attackDir == 0) yt = (y + r + yo) >> 4; // gets the tile below that you are attacking.
+			if (attackDir == 1) yt = (y - r + yo) >> 4; // gets the tile above that you are attacking.
+			if (attackDir == 2) xt = (x - r) >> 4; // gets the tile to the left that you are attacking.
+			if (attackDir == 3) xt = (x + r) >> 4; // gets the tile to the right that you are attacking.
 
-			if (xt >= 0 && yt >= 0 && xt < level.w && yt < level.h) {
-				if (activeItem.interactOn(level.getTile(xt, yt), level, xt, yt, this, attackDir)) {
-					done = true;
+			if (xt >= 0 && yt >= 0 && xt < level.w && yt < level.h) { // if (xt & yt) are larger or equal to 0 and less than the level's width and height...
+				if (activeItem.interactOn(level.getTile(xt, yt), level, xt, yt, this, attackDir)) { // if the interactOn() method in an item returns true...
+					done = true; // done equals true
 				} else {
-					if (level.getTile(xt, yt).interact(level, xt, yt, this, activeItem, attackDir)) {
-						done = true;
+					if (level.getTile(xt, yt).interact(level, xt, yt, this, activeItem, attackDir)) { // if the interact() method in an item returns true...
+						done = true; // done equals true
 					}
 				}
-				if (activeItem.isDepleted()) {
-					activeItem = null;
+				if (activeItem.isDepleted()) { // if the activeItem has 0 resources left then...
+					activeItem = null; // removes the active item.
 				}
 			}
 		}
 
-		if (done) return;
+		if (done) return; // if done is true, then skip the rest of the code
 
-		if (activeItem == null || activeItem.canAttack()) {
-			attackTime = 5;
-			int yo = -2;
-			int range = 20;
-			if (dir == 0) hurt(x - 8, y + 4 + yo, x + 8, y + range + yo);
-			if (dir == 1) hurt(x - 8, y - range + yo, x + 8, y - 4 + yo);
-			if (dir == 3) hurt(x + 4, y - 8 + yo, x + range, y + 8 + yo);
-			if (dir == 2) hurt(x - range, y - 8 + yo, x - 4, y + 8 + yo);
+		if (activeItem == null || activeItem.canAttack()) { // if there is no active item, OR if the item can be used to attack...
+			attackTime = 5; // attack time = 5
+			int yo = -2; // y offset
+			int range = 20; // range of attack
+			if (dir == 0) hurt(x - 8, y + 4 + yo, x + 8, y + range + yo); // attacks the entity below you.
+			if (dir == 1) hurt(x - 8, y - range + yo, x + 8, y - 4 + yo); // attacks the entity above you.
+			if (dir == 3) hurt(x + 4, y - 8 + yo, x + range, y + 8 + yo); // attacks the entity to the right of you.
+			if (dir == 2) hurt(x - range, y - 8 + yo, x - 4, y + 8 + yo); // attacks the entity to the left of you.
 
-			int xt = x >> 4;
-			int yt = (y + yo) >> 4;
-			int r = 12;
-			if (attackDir == 0) yt = (y + r + yo) >> 4;
-			if (attackDir == 1) yt = (y - r + yo) >> 4;
-			if (attackDir == 2) xt = (x - r) >> 4;
-			if (attackDir == 3) xt = (x + r) >> 4;
+			int xt = x >> 4; // current x-tile coordinate you are on.
+			int yt = (y + yo) >> 4; // current y-tile coordinate you are on.
+			int r = 12; // radius
+			if (attackDir == 0) yt = (y + r + yo) >> 4; // gets the tile below that you are attacking.
+			if (attackDir == 1) yt = (y - r + yo) >> 4; // gets the tile above that you are attacking.
+			if (attackDir == 2) xt = (x - r) >> 4; // gets the tile to the left that you are attacking.
+			if (attackDir == 3) xt = (x + r) >> 4; // gets the tile to the right that you are attacking.
 
-			if (xt >= 0 && yt >= 0 && xt < level.w && yt < level.h) {
-				level.getTile(xt, yt).hurt(level, xt, yt, this, random.nextInt(3) + 1, attackDir);
+			if (xt >= 0 && yt >= 0 && xt < level.w && yt < level.h) { // if (xt & yt) are larger or equal to 0 and less than the level's width and height...
+				level.getTile(xt, yt).hurt(level, xt, yt, this, random.nextInt(3) + 1, attackDir); // calls the hurt() method in that tile's class
 			}
 		}
 
@@ -218,27 +206,30 @@ public class Player extends Mob {
 		return false;
 	}
 
+	/** if the entity in-front of the player has a interact() method, it will call it */
 	private boolean interact(int x0, int y0, int x1, int y1) {
-		List<Entity> entities = level.getEntities(x0, y0, x1, y1);
-		for (int i = 0; i < entities.size(); i++) {
-			Entity e = entities.get(i);
-			if (e != this) if (e.interact(this, activeItem, attackDir)) return true;
+		List<Entity> entities = level.getEntities(x0, y0, x1, y1); // gets the entities within the 4 points
+		for (int i = 0; i < entities.size(); i++) { // cycles through the entities
+			Entity e = entities.get(i); // gets the current entity
+			if (e != this) if (e.interact(this, activeItem, attackDir)) return true; // if the entity is not the player, and has a interact() method then return true.
 		}
 		return false;
 	}
 
+	/** if the entity in-front of the player has a hurt() method, it will call it */
 	private void hurt(int x0, int y0, int x1, int y1) {
-		List<Entity> entities = level.getEntities(x0, y0, x1, y1);
-		for (int i = 0; i < entities.size(); i++) {
-			Entity e = entities.get(i);
-			if (e != this) e.hurt(this, getAttackDamage(e), attackDir);
+		List<Entity> entities = level.getEntities(x0, y0, x1, y1); // gets the entities within the 4 points
+		for (int i = 0; i < entities.size(); i++) { // cycles through the entities
+			Entity e = entities.get(i); // gets the current entity
+			if (e != this) e.hurt(this, getAttackDamage(e), attackDir); // if the entity is not the player, and has a hurt() method then return true.
 		}
 	}
 
+	/** Gets the attack damage the player has */
 	private int getAttackDamage(Entity e) {
-		int dmg = random.nextInt(3) + 1;
-		if (attackItem != null) {
-			dmg += attackItem.getAttackDamageBonus(e);
+		int dmg = random.nextInt(3) + 1; // damage is equal to a random number between 1 and 3
+		if (attackItem != null) { // if the current attack item isn't null
+			dmg += attackItem.getAttackDamageBonus(e); // adds the attack damage bonus (from a sword/axe)
 		}
 		return dmg;
 	}
@@ -327,23 +318,26 @@ public class Player extends Mob {
 		}
 	}
 
+	/** What happens when the player interacts with a itemEntity */
 	public void touchItem(ItemEntity itemEntity) {
-		itemEntity.take(this);
-		inventory.add(itemEntity.item);
+		itemEntity.take(this); // calls the take() method in ItemEntity
+		inventory.add(itemEntity.item); // adds the item into your inventory
 	}
 
+	/** Returns if the entity can swim */
 	public boolean canSwim() {
-		return true;
+		return true; // yes the player can swim
 	}
 
+	/** Finds a start position for the player to start in. */
 	public boolean findStartPos(Level level) {
-		while (true) {
-			int x = random.nextInt(level.w);
-			int y = random.nextInt(level.h);
-			if (level.getTile(x, y) == Tile.grass) {
-				this.x = x * 16 + 8;
-				this.y = y * 16 + 8;
-				return true;
+		while (true) { // will loop until it returns
+			int x = random.nextInt(level.w); // gets a random value between 0 and the world's width - 1
+			int y = random.nextInt(level.h); // gets a random value between 0 and the world's height - 1
+			if (level.getTile(x, y) == Tile.grass) { // if the tile at the x & y coordinates is a grass tile then...
+				this.x = x * 16 + 8; // the player's x coordinate will be in the middle of the tile
+				this.y = y * 16 + 8; // the player's y coordinate will be in the middle of the tile
+				return true; // returns and stop's the loop
 			}
 		}
 	}

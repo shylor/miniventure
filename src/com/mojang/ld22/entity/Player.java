@@ -234,86 +234,88 @@ public class Player extends Mob {
 		return dmg;
 	}
 
+	/** Draws the player on the screen */
 	public void render(Screen screen) {
-		int xt = 0;
-		int yt = 14;
+		int xt = 0; // X tile coordinate in the sprite-sheet
+		int yt = 14; // Y tile coordinate in the sprite-sheet
 
-		int flip1 = (walkDist >> 3) & 1;
-		int flip2 = (walkDist >> 3) & 1;
+		int flip1 = (walkDist >> 3) & 1; // This will either be a 1 or a 0 depending on the walk distance (Used for walking effect by mirroring the sprite)
+		int flip2 = (walkDist >> 3) & 1; // This will either be a 1 or a 0 depending on the walk distance (Used for walking effect by mirroring the sprite)
 
-		if (dir == 1) {
-			xt += 2;
+		if (dir == 1) { // if the direction is 1 (Up)...
+			xt += 2; // then move the sprite over 2 tiles
 		}
-		if (dir > 1) {
-			flip1 = 0;
-			flip2 = ((walkDist >> 4) & 1);
-			if (dir == 2) {
-				flip1 = 1;
+		if (dir > 1) { // if the direction is larger than 1 (left or right)...
+			flip1 = 0; // flip1 will equal 0.
+			flip2 = ((walkDist >> 4) & 1); // This will either be a 1 or a 0 depending on the walk distance (Used for walking effect by mirroring the sprite)
+			if (dir == 2) { // if the direction is 2 (left)
+				flip1 = 1; // mirror the sprite
 			}
-			xt += 4 + ((walkDist >> 3) & 1) * 2;
+			xt += 4 + ((walkDist >> 3) & 1) * 2; // animation based on walk distance
 		}
 
-		int xo = x - 8;
-		int yo = y - 11;
-		if (isSwimming()) {
-			yo += 4;
-			int waterColor = Color.get(-1, -1, 115, 335);
-			if (tickTime / 8 % 2 == 0) {
-				waterColor = Color.get(-1, 335, 5, 115);
+		/* where to draw the sprite relative to our position */
+		int xo = x - 8; // the horizontal offset location to start drawing the sprite
+		int yo = y - 11; // the vertical offset location to start drawing the sprite
+		if (isSwimming()) { // if the player is swimming...
+			yo += 4; // y offset is moved up by 4
+			int waterColor = Color.get(-1, -1, 115, 335) ; // color of water circle
+			if (tickTime / 8 % 2 == 0) { // if the remainder of (tickTime/8)/2 is equal to 0...
+				waterColor = Color.get(-1, 335, 5, 115); // change the color of water circle
 			}
-			screen.render(xo + 0, yo + 3, 5 + 13 * 32, waterColor, 0);
-			screen.render(xo + 8, yo + 3, 5 + 13 * 32, waterColor, 1);
+			screen.render(xo + 0, yo + 3, 5 + 13 * 32, waterColor, 0); // render the water graphic
+			screen.render(xo + 8, yo + 3, 5 + 13 * 32, waterColor, 1); // render the mirrored water graphic to the right.
 		}
 
-		if (attackTime > 0 && attackDir == 1) {
-			screen.render(xo + 0, yo - 4, 6 + 13 * 32, Color.get(-1, 555, 555, 555), 0);
-			screen.render(xo + 8, yo - 4, 6 + 13 * 32, Color.get(-1, 555, 555, 555), 1);
-			if (attackItem != null) {
-				attackItem.renderIcon(screen, xo + 4, yo - 4);
-			}
-		}
-		int col = Color.get(-1, 100, 220, 532);
-		if (hurtTime > 0) {
-			col = Color.get(-1, 555, 555, 555);
-		}
-
-		if (activeItem instanceof FurnitureItem) {
-			yt += 2;
-		}
-		screen.render(xo + 8 * flip1, yo + 0, xt + yt * 32, col, flip1);
-		screen.render(xo + 8 - 8 * flip1, yo + 0, xt + 1 + yt * 32, col, flip1);
-		if (!isSwimming()) {
-			screen.render(xo + 8 * flip2, yo + 8, xt + (yt + 1) * 32, col, flip2);
-			screen.render(xo + 8 - 8 * flip2, yo + 8, xt + 1 + (yt + 1) * 32, col, flip2);
-		}
-
-		if (attackTime > 0 && attackDir == 2) {
-			screen.render(xo - 4, yo, 7 + 13 * 32, Color.get(-1, 555, 555, 555), 1);
-			screen.render(xo - 4, yo + 8, 7 + 13 * 32, Color.get(-1, 555, 555, 555), 3);
-			if (attackItem != null) {
-				attackItem.renderIcon(screen, xo - 4, yo + 4);
+		if (attackTime > 0 && attackDir == 1) { // if the attack time is larger than 0 and the attack Direction is 1 (Up)
+			screen.render(xo + 0, yo - 4, 6 + 13 * 32, Color.get(-1, 555, 555, 555), 0); // render a half-slash
+			screen.render(xo + 8, yo - 4, 6 + 13 * 32, Color.get(-1, 555, 555, 555), 1); // render a mirrored half-slash to the right of it.
+			if (attackItem != null) { // if the player has an item
+				attackItem.renderIcon(screen, xo + 4, yo - 4); // then render the icon of the item.
 			}
 		}
-		if (attackTime > 0 && attackDir == 3) {
-			screen.render(xo + 8 + 4, yo, 7 + 13 * 32, Color.get(-1, 555, 555, 555), 0);
-			screen.render(xo + 8 + 4, yo + 8, 7 + 13 * 32, Color.get(-1, 555, 555, 555), 2);
-			if (attackItem != null) {
-				attackItem.renderIcon(screen, xo + 8 + 4, yo + 4);
+		int col = Color.get(-1, 100, 220, 532); // color of the player
+		if (hurtTime > 0) { // if the player is hurt...
+			col = Color.get(-1, 555, 555, 555); // then the color is white
+		}
+
+		if (activeItem instanceof FurnitureItem) { // if the active item is a furniture item
+			yt += 2; // moves the y tile 2 over. (for the player holding his hands up)
+		}
+		screen.render(xo + 8 * flip1, yo + 0, xt + yt * 32, col, flip1); // render the top-left part of the sprite
+		screen.render(xo + 8 - 8 * flip1, yo + 0, xt + 1 + yt * 32, col, flip1); // render the top-right part of the sprite
+		if (!isSwimming()) { // if the player is NOT swimming
+			screen.render(xo + 8 * flip2, yo + 8, xt + (yt + 1) * 32, col, flip2); // render the bottom-left part of the sprite
+			screen.render(xo + 8 - 8 * flip2, yo + 8, xt + 1 + (yt + 1) * 32, col, flip2); // render the bottom-right part of the sprite
+		}
+
+		if (attackTime > 0 && attackDir == 2) { // if the attack time is larger than 0 and the attack Direction is 2 (Left)
+			screen.render(xo - 4, yo, 7 + 13 * 32, Color.get(-1, 555, 555, 555), 1); // render a half-slash
+			screen.render(xo - 4, yo + 8, 7 + 13 * 32, Color.get(-1, 555, 555, 555), 3); // render a mirrored half-slash below it.
+			if (attackItem != null) { // if the player has an item
+				attackItem.renderIcon(screen, xo - 4, yo + 4); // then render the icon of the item.
 			}
 		}
-		if (attackTime > 0 && attackDir == 0) {
-			screen.render(xo + 0, yo + 8 + 4, 6 + 13 * 32, Color.get(-1, 555, 555, 555), 2);
-			screen.render(xo + 8, yo + 8 + 4, 6 + 13 * 32, Color.get(-1, 555, 555, 555), 3);
-			if (attackItem != null) {
-				attackItem.renderIcon(screen, xo + 4, yo + 8 + 4);
+		if (attackTime > 0 && attackDir == 3) { // if the attack time is larger than 0 and the attack Direction is 3 (Right)
+			screen.render(xo + 8 + 4, yo, 7 + 13 * 32, Color.get(-1, 555, 555, 555), 0); // render a half-slash
+			screen.render(xo + 8 + 4, yo + 8, 7 + 13 * 32, Color.get(-1, 555, 555, 555), 2); // render a mirrored half-slash below it.
+			if (attackItem != null) { // if the player has an item
+				attackItem.renderIcon(screen, xo + 8 + 4, yo + 4); // then render the icon of the item.
+			}
+		}
+		if (attackTime > 0 && attackDir == 0) {  // if the attack time is larger than 0 and the attack Direction is 0 (Down)
+			screen.render(xo + 0, yo + 8 + 4, 6 + 13 * 32, Color.get(-1, 555, 555, 555), 2); // render a half-slash
+			screen.render(xo + 8, yo + 8 + 4, 6 + 13 * 32, Color.get(-1, 555, 555, 555), 3); // render a mirrored half-slash to the right of it.
+			if (attackItem != null) { // if the player has an item
+				attackItem.renderIcon(screen, xo + 4, yo + 8 + 4); // then render the icon of the item.
 			}
 		}
 
-		if (activeItem instanceof FurnitureItem) {
-			Furniture furniture = ((FurnitureItem) activeItem).furniture;
-			furniture.x = x;
-			furniture.y = yo;
-			furniture.render(screen);
+		if (activeItem instanceof FurnitureItem) { // if the active Item is a furniture item.
+			Furniture furniture = ((FurnitureItem) activeItem).furniture; // gets the furniture of that item
+			furniture.x = x; // the x position is that of the player's
+			furniture.y = yo; // the y position is that of yo
+			furniture.render(screen); // renders the furniture on the screen (above his hands)
 
 		}
 	}
@@ -342,54 +344,61 @@ public class Player extends Mob {
 		}
 	}
 
+	/** Pays the stamina used for an action */
 	public boolean payStamina(int cost) {
-		if (cost > stamina) return false;
-		stamina -= cost;
-		return true;
+		if (cost > stamina) return false; // if the player doesn't have enough stamina, then return false
+		stamina -= cost; // minus the current stamina by the cost
+		return true; // return true
 	}
 
+	/** Changes the level */
 	public void changeLevel(int dir) {
-		game.scheduleLevelChange(dir);
+		game.scheduleLevelChange(dir); // schedules a level change.
 	}
 
+	/** Gets the player's light radius underground */
 	public int getLightRadius() {
-		int r = 2;
-		if (activeItem != null) {
-			if (activeItem instanceof FurnitureItem) {
-				int rr = ((FurnitureItem) activeItem).furniture.getLightRadius();
-				if (rr > r) r = rr;
-			}
+		int r = 2; // the radius of the light.
+		if (activeItem != null) { // if the player has an item
+			if (activeItem instanceof FurnitureItem) { // if item is a furniture item
+				int rr = ((FurnitureItem) activeItem).furniture.getLightRadius(); // gets the furniture's light radius
+				if (rr > r) r = rr; // if the furniture's light radius is larger than the player's, then the players light radius will equal that of the furniture's.
+			} 
 		}
-		return r;
+		return r; // return the radius
 	}
 
+	/** What happens when the player dies */
 	protected void die() {
-		super.die();
-		Sound.playerDeath.play();
+		super.die(); // calls the die() method in Mob.java
+		Sound.playerDeath.play(); // plays a sound
 	}
 
+	/** What happens when the player touches an entity */
 	protected void touchedBy(Entity entity) {
-		if (!(entity instanceof Player)) {
-			entity.touchedBy(this);
+		if (!(entity instanceof Player)) { // if the entity is not a player.
+			entity.touchedBy(this); // calls the touchedBy() method in the entity's class
 		}
 	}
 
+	/** What happens when the player is hurt */
 	protected void doHurt(int damage, int attackDir) {
-		if (hurtTime > 0 || invulnerableTime > 0) return;
+		if (hurtTime > 0 || invulnerableTime > 0) return; // if hurt time OR invulnerableTime is above 0, then skip the rest of the code.
 
-		Sound.playerHurt.play();
-		level.add(new TextParticle("" + damage, x, y, Color.get(-1, 504, 504, 504)));
-		health -= damage;
-		if (attackDir == 0) yKnockback = +6;
-		if (attackDir == 1) yKnockback = -6;
-		if (attackDir == 2) xKnockback = -6;
-		if (attackDir == 3) xKnockback = +6;
-		hurtTime = 10;
-		invulnerableTime = 30;
+		Sound.playerHurt.play(); // plays a sound
+		level.add(new TextParticle("" + damage, x, y, Color.get(-1, 504, 504, 504))); // adds a text particle telling how much damage was done.
+		health -= damage; // health is decreased by the damage amount
+		if (attackDir == 0) yKnockback = +6; // if the direction was from below, then get knocked above.
+		if (attackDir == 1) yKnockback = -6; // if the direction was from above, then get knocked below.
+		if (attackDir == 2) xKnockback = -6; // if the direction was from the right, then get knocked to the left.
+		if (attackDir == 3) xKnockback = +6; // if the direction was from the left, then get knocked to the right.
+		hurtTime = 10; // hurt time set to 10
+		invulnerableTime = 30; // invulnerable time is set to 30
 	}
 
+	/** What happens when the player wins */
 	public void gameWon() {
-		level.player.invulnerableTime = 60 * 5;
-		game.won();
+		level.player.invulnerableTime = 60 * 5; // sets the invulnerable time to 300
+		game.won(); // win the game
 	}
 }

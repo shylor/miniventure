@@ -30,17 +30,21 @@ public class Resource {
 	public static Resource cloud = new PlantableResource("cloud", 2 + 4 * 32, Color.get(-1, 222, 555, 444), Tile.cloud, Tile.infiniteFall);
 	public static Resource gem = new Resource("gem", 13 + 4 * 32, Color.get(-1, 101, 404, 545));
 
-	public final String name;
-	public final int sprite;
-	public final int color;
+	// public static Resource resource = new Resource("Name", x-sprite position + y-sprite position * 32, Color.get(-1,555,555,555))
+	
+	public final String name; // the name of the resource
+	public final int sprite; // the sprite of the resource
+	public final int color; // the color of the resource
 
 	public Resource(String name, int sprite, int color) {
+		/* if the name is longer than six characters, then throw an error.*/
 		if (name.length() > 6) throw new RuntimeException("Name cannot be longer than six characters!");
-		this.name = name;
-		this.sprite = sprite;
-		this.color = color;
+		this.name = name; // assigns the name
+		this.sprite = sprite; // assigns the sprite
+		this.color = color; // assigns the color
 	}
 
+	/** Determines what happens when the resource is used on a certain tile */
 	public boolean interactOn(Tile tile, Level level, int xt, int yt, Player player, int attackDir) {
 		return false;
 	}

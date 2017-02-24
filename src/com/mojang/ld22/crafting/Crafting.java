@@ -26,11 +26,11 @@ public class Crafting {
 			 * (new FurnitureRecipe(Lantern.class)) makes a new furniture recipe for the lantern class
 			 * addCost(Resource.wood, 5) adds a material to the recipe. The name after "Resource." is what material and the number is how many needed
 			 */
-			
-			
+
+
 			workbenchRecipes.add(new FurnitureRecipe(Lantern.class).addCost(Resource.wood, 5).addCost(Resource.slime, 10).addCost(Resource.glass, 4));
-			workbenchRecipes.add(new FurnitureRecipe(Oven.class).addCost(Resource.stone, 15));
-			workbenchRecipes.add(new FurnitureRecipe(Furnace.class).addCost(Resource.stone, 20));
+			workbenchRecipes.add(new FurnitureRecipe(Oven.class).addCost(Resource.stone, 20).addCost(Resource.slime, 5));
+			workbenchRecipes.add(new FurnitureRecipe(Furnace.class).addCost(Resource.stone, 20).addCost(Resource.coal, 5);
 			workbenchRecipes.add(new FurnitureRecipe(Workbench.class).addCost(Resource.wood, 20));
 			workbenchRecipes.add(new FurnitureRecipe(Chest.class).addCost(Resource.wood, 20));
 			workbenchRecipes.add(new FurnitureRecipe(Anvil.class).addCost(Resource.ironIngot, 5));

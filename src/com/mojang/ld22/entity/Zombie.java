@@ -23,7 +23,7 @@ public class Zombie extends Mob {
 
 		if (level.player != null && randomWalkTime == 0) { // checks if player is on zombies level and if there is no time left on timer
 			int xd = level.player.x - x; // gets the horizontal distance between the zombie and the player
-			int yd = level.player.y - y; // gets the vertical distance between the zombie and the player 
+			int yd = level.player.y - y; // gets the vertical distance between the zombie and the player
 			if (xd * xd + yd * yd < 50 * 50) { // more evil distance checker code
 				xa = 0; // sets direction to nothing
 				ya = 0;
@@ -53,7 +53,7 @@ public class Zombie extends Mob {
 		// change the 3 in (walkDist >> 3) to change the time it will take to switch sprites. (bigger number = longer time).
 		int flip1 = (walkDist >> 3) & 1; // This will either be a 1 or a 0 depending on the walk distance (Used for walking effect by mirroring the sprite)
 		int flip2 = (walkDist >> 3) & 1; // This will either be a 1 or a 0 depending on the walk distance (Used for walking effect by mirroring the sprite)
-		
+
 		if (dir == 1) { //if facing up
 			xt += 2; //change sprite to up
 		}
@@ -88,7 +88,7 @@ public class Zombie extends Mob {
 
 	protected void touchedBy(Entity entity) {
 		if (entity instanceof Player) { // if the entity touches the player
-			entity.hurt(this, lvl + 1, dir); // hurts the player, damage is based on lvl.
+			entity.hurt(this, 2, dir); // hurts the player, damage is based on lvl.
 		}
 	}
 
